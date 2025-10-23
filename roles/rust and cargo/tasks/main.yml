@@ -1,0 +1,43 @@
+---
+- name: Ensure curl is installed
+  become: yes
+  apt:
+    name: curl
+    state: present
+    update_cache: yes
+
+# Install Rust and Cargo via rustup (non-interactive)
+- name: Install Rust using rustup
+  become: yes
+  become_user: root
+  shell: |
+    curl https://sh.rustup.rs -sSf | sh -s -- -y
+  args:
+    creates: /root/.cargo/bin/rustc  # prevents reinstallation
+
+# Add Cargo environment to root’s .bashrc
+- name: Ensure Cargo env line is added to .bashrc
+  become: yes
+  lineinfile:
+    path: /root/.bashrc
+    line: "source $HOME/.cargo/env"
+    insertafter: EOF
+    state: present
+
+# Ensure Cargo binary directory is in system PATH
+- name: Add Cargo bin to global PATH
+  become: yes
+  copy:
+    dest: /etc/profile.d/cargo_path.sh
+    content: 'export PATH="/root/.cargo/bin:$PATH"'
+    mode: '0644'
+
+# Ensure /var/www/html exists (matches Dockerfile WORKDIR)
+- name: Ensure /var/www/html directory exists
+  become: yes
+  file:
+    path: /var/www/html
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'

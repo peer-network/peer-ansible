@@ -37,8 +37,35 @@
       - php8.3-intl
       - php8.3-readline
       - php8.3-opcache
+      - php8.3-bcmath 
+      - php8.3-gmp
     state: present
 
+# Configure FFI extension before compilation
+- name: Configure FFI extension
+  command: docker-php-ext-configure ffi
+  args:
+    chdir: /usr/src/php
+  when: ansible_facts['distribution'] == 'Debian' or ansible_facts['distribution'] == 'Ubuntu'
+  ignore_errors: yes  # only needed if building outside Docker
+
+# Ensure required PHP 8.3 extensions are installed via APT
+- name: Install PHP 8.3 extensions
+  become: yes
+  apt:
+    name:
+      - php8.3-pgsql
+      - php8.3-pdo
+      - php8.3-bcmath
+      - php8.3-xml
+      - php8.3-curl
+      - php8.3-gmp
+      - php8.3-ffi
+    state: present
+    update_cache: yes
+
+
+### Start php8.3
 - name: Ensure PHP-FPM is started and enabled
   systemd:
     name: php8.3-fpm
@@ -92,3 +119,27 @@
     owner: www-data
     group: www-data
     mode: '0644'
+
+
+# FROM php:8.3-fpm-bullseye
+
+# # Install system dependencies (ffmpeg included)
+# RUN apt-get update && \
+#     apt-get install -y \
+#         nginx supervisor \
+#         git unzip curl libpq-dev postgresql-client \
+#         openssl libzip-dev zlib1g-dev libxml2-dev \
+#         libcurl4-openssl-dev libgmp-dev \
+#         libffi-dev pkg-config \
+#         ffmpeg && \
+#     docker-php-ext-configure ffi && \
+#     docker-php-ext-install \
+#         pgsql pdo pdo_pgsql bcmath xml curl gmp ffi && \
+#     apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# # Install Rust and Cargo
+# RUN curl https://sh.rustup.rs -sSf | sh -s -- -y && \
+#     echo 'source $HOME/.cargo/env' >> /root/.bashrc
+# ENV PATH="/root/.cargo/bin:$PATH"
+
+# WORKDIR /var/www/html
