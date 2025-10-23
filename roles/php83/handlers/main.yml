@@ -1,0 +1,8 @@
+# ==================================================
+# FILE: roles/php83/handlers/main.yml
+# ==================================================
+---
+- name: Restart PHP-FPM
+  systemd:
+    name: php8.3-fpm
+    state: restarted

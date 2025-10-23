@@ -1,0 +1,67 @@
+# ==================================================
+# FILE: test-playbook.yml
+# Save this as: /home/peer/ansible/test-playbook.yml
+# ==================================================
+---
+- name: Test connectivity to all VMs
+  hosts: all
+  gather_facts: yes
+  tasks:
+    
+    - name: Ping test
+      ping:
+      register: ping_result
+    
+    - name: Get hostname
+      command: hostname
+      register: hostname_result
+      changed_when: false
+    
+    - name: Get IP address
+      shell: ip addr show eth0 | grep "inet " | awk '{print $2}'
+      register: ip_result
+      changed_when: false
+    
+    - name: Check disk usage
+      shell: df -h / | tail -1 | awk '{print $5}'
+      register: disk_result
+      changed_when: false
+    
+    - name: Check memory usage
+      shell: free -h | grep Mem | awk '{print $3 "/" $2}'
+      register: mem_result
+      changed_when: false
+    
+    - name: Check if qemu-guest-agent is running
+      systemd:
+        name: qemu-guest-agent
+      register: qemu_agent
+      failed_when: false
+    
+    - name: Display VM information
+      debug:
+        msg:
+          - "Hostname: {{ hostname_result.stdout }}"
+          - "IP Address: {{ ip_result.stdout }}"
+          - "Disk Usage: {{ disk_result.stdout }}"
+          - "Memory Usage: {{ mem_result.stdout }}"
+          - "QEMU Agent: {{ 'Running' if qemu_agent.status.ActiveState == 'active' else 'Not Running' }}"
+          - "OS: {{ ansible_distribution }} {{ ansible_distribution_version }}"
+          - "Kernel: {{ ansible_kernel }}"
+
+- name: Generate summary report
+  hosts: localhost
+  gather_facts: no
+  tasks:
+    - name: Create summary
+      debug:
+        msg:
+          - "=========================================="
+          - "VM Test Summary"
+          - "=========================================="
+          - "Total VMs: {{ groups['all'] | length }}"
+          - "Web Servers: {{ groups['web_servers'] | length }}"
+          - "Backend Servers: {{ groups['app_servers'] | length }}"
+          - "Database Servers: {{ groups['database_servers'] | length }}"
+          - "Management: {{ groups['bastion_servers'] | length }}"
+          - "=========================================="

@@ -1,0 +1,94 @@
+# ==================================================
+# FILE: roles/php83/tasks/main.yml
+# PHP 8.3 installation role
+# ==================================================
+---
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+- name: Install software-properties-common
+  apt:
+    name: software-properties-common
+    state: present
+
+- name: Add Ondrej PHP PPA
+  apt_repository:
+    repo: ppa:ondrej/php
+    state: present
+    update_cache: yes
+
+- name: Install PHP 8.3 and common extensions
+  apt:
+    name:
+      - php8.3
+      - php8.3-fpm
+      - php8.3-cli
+      - php8.3-common
+      - php8.3-mysql
+      - php8.3-pgsql
+      - php8.3-xml
+      - php8.3-curl
+      - php8.3-gd
+      - php8.3-mbstring
+      - php8.3-zip
+      - php8.3-bcmath
+      - php8.3-intl
+      - php8.3-readline
+      - php8.3-opcache
+    state: present
+
+- name: Ensure PHP-FPM is started and enabled
+  systemd:
+    name: php8.3-fpm
+    state: started
+    enabled: yes
+
+- name: Configure PHP-FPM pool
+  lineinfile:
+    path: /etc/php/8.3/fpm/pool.d/www.conf
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    backup: yes
+  loop:
+    - { regexp: '^;?listen.owner', line: 'listen.owner = www-data' }
+    - { regexp: '^;?listen.group', line: 'listen.group = www-data' }
+    - { regexp: '^;?listen.mode', line: 'listen.mode = 0660' }
+  notify: Restart PHP-FPM
+
+- name: Configure PHP settings
+  lineinfile:
+    path: /etc/php/8.3/fpm/php.ini
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    backup: yes
+  loop:
+    - { regexp: '^;?upload_max_filesize', line: 'upload_max_filesize = 64M' }
+    - { regexp: '^;?post_max_size', line: 'post_max_size = 64M' }
+    - { regexp: '^;?memory_limit', line: 'memory_limit = 256M' }
+    - { regexp: '^;?max_execution_time', line: 'max_execution_time = 300' }
+    - { regexp: '^;?date.timezone', line: 'date.timezone = Europe/Berlin' }
+  notify: Restart PHP-FPM
+
+- name: Create PHP info page
+  copy:
+    content: |
+      <?php
+      phpinfo();
+    dest: /var/www/html/info.php
+    owner: www-data
+    group: www-data
+    mode: '0644'
+
+- name: Create PHP test page
+  copy:
+    content: |
+      <?php
+      echo "<h1>PHP is working!</h1>";
+      echo "<p>Server: " . gethostname() . "</p>";
+      echo "<p>PHP Version: " . phpversion() . "</p>";
+    dest: /var/www/html/test.php
+    owner: www-data
+    group: www-data
+    mode: '0644'

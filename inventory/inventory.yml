@@ -1,0 +1,104 @@
+# inventory.yml - Ansible inventory for peerapp.eu VMs
+# Save as: /etc/ansible/inventory.yml or ~/ansible/inventory.yml
+
+all:
+  vars:
+    ansible_user: peer
+    ansible_ssh_private_key_file: ~/.ssh/ovh-host
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+    ansible_python_interpreter: /usr/bin/python3
+  
+  children:
+    # Production environment
+    production:
+      children:
+        web_servers:
+          hosts:
+            peer-prod-website:
+              ansible_host: 192.168.1.110
+              vm_id: 106
+              cpu_cores: 1
+              memory_gb: 1
+              disk_gb: 20
+              role: website
+              domains:
+                - peerapp.eu
+                - www.peerapp.eu
+                - website.peerapp.eu
+                - www.website.peerapp.eu
+            
+            peer-prod-frontend:
+              ansible_host: 192.168.1.120
+              vm_id: 100
+              cpu_cores: 1
+              memory_gb: 1
+              disk_gb: 20
+              role: frontend
+              domains:
+                - frontend.peerapp.eu
+                - www.frontend.peerapp.eu
+        
+        app_servers:
+          hosts:
+            peer-prod-backend:
+              ansible_host: 192.168.1.200
+              vm_id: 105
+              cpu_cores: 5
+              memory_gb: 32
+              disk_gb: 50
+              role: backend
+              domains:
+                - media.peerapp.eu
+                - www.media.peerapp.eu
+                - backend.peerapp.eu
+        
+        database_servers:
+          hosts:
+            peer-prod-database:
+              ansible_host: 192.168.1.210
+              vm_id: 102
+              cpu_cores: 3
+              memory_gb: 16
+              disk_gb: 20
+              role: database
+        
+        admin_servers:
+          hosts:
+            peer-prod-admin:
+              ansible_host: 192.168.1.50
+              vm_id: 103
+              cpu_cores: 1
+              memory_gb: 1
+              disk_gb: 20
+              role: admin
+        
+        bastion_servers:
+          hosts:
+            peer-prod-bastion:
+              ansible_host: 192.168.1.10
+              vm_id: 104
+              cpu_cores: 1
+              memory_gb: 2
+              disk_gb: 20
+              role: bastion
+              external_ip: 51.38.118.220
+    
+    # Group all internal VMs (excluding bastion)
+    internal:
+      children:
+        web_servers:
+        app_servers:
+        database_servers:
+        admin_servers:
+    
+    # Group VMs that need public access via HAProxy
+    public_web:
+      children:
+        web_servers:
+        app_servers:
+
+vars:
+    ansible_user: peer
+    ansible_ssh_private_key_file: ~/.ssh/ovh-host
+    ansible_python_interpreter: /usr/bin/python3
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
