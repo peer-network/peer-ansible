@@ -32,12 +32,4 @@
     content: 'export PATH="/root/.cargo/bin:$PATH"'
     mode: '0644'
 
-# Ensure /var/www/html exists (matches Dockerfile WORKDIR)
-- name: Ensure /var/www/html directory exists
-  become: yes
-  file:
-    path: /var/www/html
-    state: directory
-    owner: www-data
-    group: www-data
-    mode: '0755'
+

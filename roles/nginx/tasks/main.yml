@@ -3,10 +3,55 @@
 # Nginx installation role
 # ==================================================
 ---
-- name: Update apt cache
+### in common role: 
+
+
+### Conf the Backend server:
+### in common: sudo apt update
+
+### install php:
+### In php role
+	
+	# kill apache2:
+### Stop and Remove Apache2
+- name: Stop and disable Apache2 if running
+  become: yes
+  service:
+    name: apache2
+    state: stopped
+    enabled: no
+  ignore_errors: yes  # in case it's already absent
+
+- name: Remove Apache2 packages
+  become: yes
   apt:
-    update_cache: yes
-    cache_valid_time: 3600
+    name: apache2*
+    state: absent
+    purge: yes
+    autoremove: yes
+    autoclean: yes
+  
+- name: Install nignx needed packages
+  become: yes
+  apt:
+    - net-tools
+    - nginx
+
+- name: Ensure Nginx is started and enabled
+  systemd:
+    name: nginx
+    state: started
+    enabled: yes
+
+#  notify:
+#    - Reload Nginx
+    
+
+
+		sudo composer require james-heinrich/getid3
+
+
+
 
 - name: Install Nginx
   apt:
@@ -46,38 +91,16 @@
     group: www-data
     mode: '0644'
 
-- name: Configure Nginx default site
-  copy:
-    content: |
-      server {
-          listen 80 default_server;
-          listen [::]:80 default_server;
-          
-          root /var/www/html;
-          index index.php index.html index.htm;
-          
-          server_name _;
-          
-          location / {
-              try_files $uri $uri/ =404;
-          }
-          
-          location ~ \.php$ {
-              include snippets/fastcgi-php.conf;
-              fastcgi_pass unix:/run/php/php8.3-fpm.sock;
-          }
-          
-          location ~ /\.ht {
-              deny all;
-          }
-      }
-    dest: /etc/nginx/sites-available/default
+- name: Ensure Nginx configuration directory exists
+  file:
+    path: /etc/nginx/
+    state: directory
+
+- name: Deploy PHP configuration from template
+  template:
+    src: php.ini.j2
+    dest: /etc/nginx/default.conf
     owner: root
     group: root
     mode: '0644'
   notify: Reload Nginx
-
-- name: Remove default Nginx welcome page
-  file:
-    path: /var/www/html/index.nginx-debian.html
-    state: absent

@@ -6,10 +6,7 @@
     - role: php83
     - role: rust
 
-- name: Update apt cache
-  apt:
-    update_cache: yes
-    cache_valid_time: 3600
+### moved to common - name: Update apt cache
 
 - name: Install Apache2
   apt:

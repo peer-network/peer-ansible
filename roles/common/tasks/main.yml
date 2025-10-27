@@ -1,0 +1,26 @@
+### Common taks to set up server
+
+---    
+
+### update teh apt cache and list, set set time to 1 hour/Studen
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+
+### Full update for all packages
+- name: Update all packages to their latest version
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+    
+# Most servers have nginx so creat /www dir
+# Ensure /var/www/html exists (matches Dockerfile WORKDIR)
+- name: Ensure /var/www/html directory exists
+  become: yes
+  file:
+    path: /var/www/html
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'

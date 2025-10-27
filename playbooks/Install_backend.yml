@@ -1,0 +1,18 @@
+### Install backend server
+###
+### 
+
+- name: Install Backend server
+  hosts: peer-prod-backend
+  gather_facts: yes
+  tasks:
+
+### (moved to common) Ensure /var/www/html exists (matches Dockerfile WORKDIR)
+
+### Temp command for runnign roles
+    - name: Call roles for backend
+      become: yes
+      include_roles:
+        - backend
+        - php8.3
+        - rust_and_cargo

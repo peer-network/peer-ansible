@@ -1,6 +1,9 @@
 # ==================================================
 # FILE: roles/php83/tasks/main.yml
-# PHP 8.3 installation role
+# PHP 8.3 installation role  
+#
+# For backend install
+# PHP8.3 + nginx
 # ==================================================
 ---
 - name: Update apt cache
@@ -37,32 +40,42 @@
       - php8.3-intl
       - php8.3-readline
       - php8.3-opcache
-      - php8.3-bcmath 
       - php8.3-gmp
+      - php8.3-pdo
+      - php8.3-ffi
     state: present
 
-# Configure FFI extension before compilation
-- name: Configure FFI extension
-  command: docker-php-ext-configure ffi
-  args:
-    chdir: /usr/src/php
-  when: ansible_facts['distribution'] == 'Debian' or ansible_facts['distribution'] == 'Ubuntu'
-  ignore_errors: yes  # only needed if building outside Docker
-
-# Ensure required PHP 8.3 extensions are installed via APT
-- name: Install PHP 8.3 extensions
+- name: Install Backend Aplications
   become: yes
   apt:
     name:
-      - php8.3-pgsql
-      - php8.3-pdo
-      - php8.3-bcmath
-      - php8.3-xml
-      - php8.3-curl
-      - php8.3-gmp
-      - php8.3-ffi
+    - openssl 
+    - libzip-dev 
+    - zlib1g-dev 
+    - libxml2-dev 
+    - libcurl4-openssl-dev 
+    - libgmp-dev 
+    - libffi-dev 
+    - pkg-config 
+    - ffmpeg
+    - curl
+    - unzip
     state: present
     update_cache: yes
+
+## for install these need to be added - php-cli  - unzip   - curl
+- name: Install Composer globally
+  become: yes
+  shell: |
+    curl -sS https://getcomposer.org/installer | php
+    mv composer.phar /usr/local/bin/composer
+  args:
+    creates: /usr/local/bin/composer
+
+- name: Verify Composer installation
+  command: composer --version
+  register: composer_check
+  changed_when: false
 
 
 ### Start php8.3
@@ -91,22 +104,22 @@
     line: "{{ item.line }}"
     backup: yes
   loop:
-    - { regexp: '^;?upload_max_filesize', line: 'upload_max_filesize = 64M' }
-    - { regexp: '^;?post_max_size', line: 'post_max_size = 64M' }
-    - { regexp: '^;?memory_limit', line: 'memory_limit = 256M' }
-    - { regexp: '^;?max_execution_time', line: 'max_execution_time = 300' }
+    - { regexp: '^;?upload_max_filesize', line: 'upload_max_filesize = 510M' }
+    - { regexp: '^;?post_max_size', line: 'post_max_size = 510M' }
+    - { regexp: '^;?memory_limit', line: 'memory_limit = 510M' }  # Chcek for memory exeede
+    - { regexp: '^;?max_execution_time', line: 'max_execution_time = 3600' }  # hour / Stunde
     - { regexp: '^;?date.timezone', line: 'date.timezone = Europe/Berlin' }
   notify: Restart PHP-FPM
 
-- name: Create PHP info page
-  copy:
-    content: |
-      <?php
-      phpinfo();
-    dest: /var/www/html/info.php
-    owner: www-data
-    group: www-data
-    mode: '0644'
+# - name: Create PHP info page
+#   copy:
+#     content: |
+#       <?php
+#       phpinfo();
+#     dest: /var/www/html/info.php
+#     owner: www-data
+#     group: www-data
+#     mode: '0644'
 
 - name: Create PHP test page
   copy:
