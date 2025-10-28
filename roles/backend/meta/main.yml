@@ -7,4 +7,4 @@ dependencies:
   - role: common
   - role: php83
   - role: nginx
-  - role: rust
+  - role: rust_and_cargo

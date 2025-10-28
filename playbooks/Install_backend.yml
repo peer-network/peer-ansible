@@ -4,7 +4,7 @@
 # ==================================================
 ---
 - name: Install Backend Server (PHP 8.3 + Nginx + Rust)
-  hosts: backend
+  hosts: app_servers
   become: yes
   
   vars:
@@ -13,7 +13,7 @@
     php_upload_max: "510M"
     php_post_max: "510M"
     php_max_execution_time: "3600"
-    ansible_user: "{{ ansible_user | default('peer') }}"
+    # ansible_user: "{{ ansible_user | default('peer') }}"
     
   ### Thisis a role of roles, as 'backend' will call other roles  
   roles:
