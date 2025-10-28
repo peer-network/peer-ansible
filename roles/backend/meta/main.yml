@@ -1,0 +1,10 @@
+# ==================================================
+# FILE: roles/backend/meta/main.yml
+# Backend role dependencies (follows bash script order)
+# ==================================================
+---
+dependencies:
+  - role: common          # STEP 1
+  - role: php83           # STEP 2, 3, 4, 7
+  - role: rust_and_cargo  # STEP 5
+  - role: nginx           # STEP 6
