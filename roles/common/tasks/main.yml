@@ -31,12 +31,22 @@
     mode: '0755'
 
 # install the basic packages common by php nginx apache2 rust and others.
-- name: Install common utilities
+- name: "STEP 1: Install core system dependencies"
   apt:
     name:
-      - curl
-      - wget
-      - vim
+      - nginx
       - git
-      - htop
+      - unzip
+      - curl
+      - openssl 
+      - libzip-dev
+      - zlib1g-dev
+      - libxml2-dev
+      - libcurl4-openssl-dev
+      - libgmp-dev
+      - libffi-dev
+      - pkg-config
+      - libpq-dev
+      - ffmpeg
+      - tree
     state: present

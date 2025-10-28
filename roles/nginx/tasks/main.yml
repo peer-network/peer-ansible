@@ -1,82 +1,53 @@
 # ==================================================
 # FILE: roles/nginx/tasks/main.yml
-# Nginx installation role
+# Installing Nginx:  Setup Nginx configuration
+# Matches: cp ./docker/nginx/default.conf ... && systemctl restart
 # ==================================================
 ---
-# Stop and Remove Apache2 (conflicts with nginx)
-- name: Stop and disable Apache2 if running
-  become: yes
-  service:
-    name: apache2
-    state: stopped
-    enabled: no
-  ignore_errors: yes
-
-- name: Remove Apache2 packages
-  become: yes
-  apt:
-    name: apache2*
-    state: absent
-    purge: yes
-    autoremove: yes
-    autoclean: yes
-
-# Install nginx
-- name: Install nginx and supporting packages
-  become: yes
-  apt:
-    name:
-      - nginx
-      - net-tools
-    state: present
-    update_cache: yes
-
-- name: Ensure Nginx is started and enabled
+- name: "Installing Nginx:  Ensure Nginx is started and enabled"
   systemd:
     name: nginx
     state: started
     enabled: yes
 
-- name: Create web root directory
-  file:
-    path: /var/www/html
-    state: directory
-    owner: www-data
-    group: www-data
-    mode: '0755'
+- name: "Installing Nginx:  Check if nginx default.conf exists in source"
+  stat:
+    path: "{{ playbook_dir }}/../docker/nginx/default.conf"
+  register: nginx_conf_source
+  delegate_to: localhost
+  become: no
 
-- name: Create public directory for application
-  file:
-    path: /var/www/html/public
-    state: directory
-    owner: www-data
-    group: www-data
-    mode: '0755'
+- name: "Installing Nginx:  Setup Nginx configuration from docker/nginx/default.conf"
+  when: nginx_conf_source.stat.exists
+  block:
+    - name: Copy default.conf to server
+      copy:
+        src: "{{ playbook_dir }}/../docker/nginx/default.conf"
+        dest: /etc/nginx/sites-available/default
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart Nginx
 
-# Deploy nginx configuration
-- name: Deploy Nginx default site configuration
-  copy:
-    src: default.conf
-    dest: /etc/nginx/sites-available/default
-    owner: root
-    group: root
-    mode: '0644'
-  notify: Reload Nginx
+- name: "Installing Nginx:  Setup Nginx configuration from role files"
+  when: not nginx_conf_source.stat.exists
+  block:
+    - name: Display warning about missing docker/nginx/default.conf
+      debug:
+        msg: "Warning: ./docker/nginx/default.conf not found, using default from role"
 
-- name: Ensure default site is enabled
+    - name: Copy default.conf from role files
+      copy:
+        src: default.conf
+        dest: /etc/nginx/sites-available/default
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart Nginx
+
+- name: "Installing Nginx:  Ensure default site is enabled"
   file:
     src: /etc/nginx/sites-available/default
     dest: /etc/nginx/sites-enabled/default
     state: link
-  notify: Reload Nginx
-
-- name: Remove default index.html if exists
-  file:
-    path: /var/www/html/index.html
-    state: absent
-
-- name: Test Nginx configuration
-  command: nginx -t
-  register: nginx_test
-  changed_when: false
-  failed_when: nginx_test.rc != 0
+  notify: Restart Nginx
