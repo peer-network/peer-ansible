@@ -3,6 +3,7 @@
 # Playbook to install backend server
 # ==================================================
 ---
+
 - name: Install Backend Server (PHP 8.3 + Nginx + Rust)
   hosts: app_servers
   become: yes
