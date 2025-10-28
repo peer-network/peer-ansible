@@ -1,18 +1,35 @@
 # ==================================================
 # FILE: roles/backend/tasks/main.yml
+# Backend server setup (combines PHP, Nginx, Rust)
 # ==================================================
 ---
-  dependencies:
-    - role: php83
-    - role: rust
+- name: Display backend setup message
+  debug:
+    msg: "Setting up backend server with PHP 8.3, Nginx, and Rust"
 
-### moved to common - name: Update apt cache
+# The actual installation is handled by role dependencies
+# defined in roles/backend/meta/main.yml
 
-- name: Install Apache2
-  apt:
-    name: 
-      - apache2
-      - apache2-utils
-    state: present
+- name: Ensure all services are running
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  loop:
+    - nginx
+    - php8.3-fpm
 
+- name: Verify PHP-FPM socket exists
+  stat:
+    path: /run/php/php8.3-fpm.sock
+  register: php_sock
+  failed_when: not php_sock.stat.exists
 
+- name: Display backend server info
+  debug:
+    msg:
+      - "Backend server setup complete!"
+      - "PHP Version: 8.3"
+      - "Web Server: Nginx"
+      - "Document Root: /var/www/html/public"
+      - "Test URL: http://{{ ansible_host }}/test.php"

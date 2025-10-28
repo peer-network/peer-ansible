@@ -3,24 +3,14 @@
 # Nginx installation role
 # ==================================================
 ---
-### in common role: 
-
-
-### Conf the Backend server:
-### in common: sudo apt update
-
-### install php:
-### In php role
-	
-	# kill apache2:
-### Stop and Remove Apache2
+# Stop and Remove Apache2 (conflicts with nginx)
 - name: Stop and disable Apache2 if running
   become: yes
   service:
     name: apache2
     state: stopped
     enabled: no
-  ignore_errors: yes  # in case it's already absent
+  ignore_errors: yes
 
 - name: Remove Apache2 packages
   become: yes
@@ -30,33 +20,16 @@
     purge: yes
     autoremove: yes
     autoclean: yes
-  
-- name: Install nignx needed packages
+
+# Install nginx
+- name: Install nginx and supporting packages
   become: yes
   apt:
-    - net-tools
-    - nginx
-
-- name: Ensure Nginx is started and enabled
-  systemd:
-    name: nginx
-    state: started
-    enabled: yes
-
-#  notify:
-#    - Reload Nginx
-    
-
-
-		sudo composer require james-heinrich/getid3
-
-
-
-
-- name: Install Nginx
-  apt:
-    name: nginx
+    name:
+      - nginx
+      - net-tools
     state: present
+    update_cache: yes
 
 - name: Ensure Nginx is started and enabled
   systemd:
@@ -72,35 +45,38 @@
     group: www-data
     mode: '0755'
 
-- name: Deploy default index page
-  copy:
-    content: |
-      <!DOCTYPE html>
-      <html>
-      <head>
-          <title>{{ inventory_hostname }}</title>
-      </head>
-      <body>
-          <h1>{{ inventory_hostname }}</h1>
-          <p>Server is running Nginx</p>
-          <p>IP: {{ ansible_host }}</p>
-      </body>
-      </html>
-    dest: /var/www/html/index.html
+- name: Create public directory for application
+  file:
+    path: /var/www/html/public
+    state: directory
     owner: www-data
     group: www-data
-    mode: '0644'
+    mode: '0755'
 
-- name: Ensure Nginx configuration directory exists
-  file:
-    path: /etc/nginx/
-    state: directory
-
-- name: Deploy PHP configuration from template
-  template:
-    src: php.ini.j2
-    dest: /etc/nginx/default.conf
+# Deploy nginx configuration
+- name: Deploy Nginx default site configuration
+  copy:
+    src: default.conf
+    dest: /etc/nginx/sites-available/default
     owner: root
     group: root
     mode: '0644'
   notify: Reload Nginx
+
+- name: Ensure default site is enabled
+  file:
+    src: /etc/nginx/sites-available/default
+    dest: /etc/nginx/sites-enabled/default
+    state: link
+  notify: Reload Nginx
+
+- name: Remove default index.html if exists
+  file:
+    path: /var/www/html/index.html
+    state: absent
+
+- name: Test Nginx configuration
+  command: nginx -t
+  register: nginx_test
+  changed_when: false
+  failed_when: nginx_test.rc != 0

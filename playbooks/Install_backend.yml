@@ -1,19 +1,64 @@
-### Install backend server
-###
-### 
+# ==================================================
+# FILE: playbooks/backend-install.yml
+# Playbook to install backend server
+# ==================================================
+---
+- name: Install Backend Server (PHP 8.3 + Nginx + Rust)
+  hosts: backend
+  become: yes
+  
+  vars:
+    # You can override these in your inventory
+    php_memory_limit: "510M"
+    php_upload_max: "510M"
+    php_post_max: "510M"
+    php_max_execution_time: "3600"
+    
+  ### Thisis a role of roles, as 'backend' will call other roles  
+  roles:
+    - backend
+    
+  post_tasks:
+    - name: Display completion message
+      debug:
+        msg:
+          - "=========================================="
+          - "Backend installation complete!"
+          - "=========================================="
+          - "Services installed:"
+          - "  - PHP 8.3 with PHP-FPM"
+          - "  - Nginx web server"
+          - "  - Composer"
+          - "  - Rust and Cargo"
+          - "  - FFmpeg"
+          - ""
+          - "Test your installation:"
+          - "  curl http://{{ ansible_host }}/test.php"
+          - ""
+          - "Next steps:"
+          - "  1. Deploy your application to /var/www/html"
+          - "  2. Run composer install in your app directory"
+          - "  3. Configure your .env file"
+          - "=========================================="
 
-- name: Install Backend server
-  hosts: peer-prod-backend
-  gather_facts: yes
-  tasks:
 
-### (moved to common) Ensure /var/www/html exists (matches Dockerfile WORKDIR)
 
-- tasks:
+# ### Install backend server
+# ###
+# ### 
 
-### Temp command for runnign roles
-- roles:
-  - common
-  - backend
-  - php8.3
-  - rust_and_cargo
+# - name: Install Backend server
+#   hosts: peer-prod-backend
+#   gather_facts: yes
+#   tasks:
+
+# ### (moved to common) Ensure /var/www/html exists (matches Dockerfile WORKDIR)
+
+# - tasks:
+
+# ### Temp command for runnign roles
+# - roles:
+#   - common
+#   - backend
+#   - php8.3
+#   - rust_and_cargo

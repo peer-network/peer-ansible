@@ -1,0 +1,10 @@
+# ==================================================
+# FILE: roles/backend/meta/main.yml
+# Backend role dependencies
+# ==================================================
+---
+dependencies:
+  - role: common
+  - role: php83
+  - role: nginx
+  - role: rust

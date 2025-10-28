@@ -1,4 +1,9 @@
-### Common taks to set up server
+# ==================================================
+# FILE: roles/common/tasks/main.yml
+# Common tasks to set up server
+# define /var/www/html directory
+# update and install 
+# ==================================================
 
 ---    
 
@@ -24,3 +29,14 @@
     owner: www-data
     group: www-data
     mode: '0755'
+
+# install the basic packages common by php nginx apache2 rust and others.
+- name: Install common utilities
+  apt:
+    name:
+      - curl
+      - wget
+      - vim
+      - git
+      - htop
+    state: present

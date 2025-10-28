@@ -7,3 +7,7 @@
     name: php8.3-fpm
     state: restarted
 
+- name: Reload PHP-FPM
+  systemd:
+    name: php8.3-fpm
+    state: reloaded
