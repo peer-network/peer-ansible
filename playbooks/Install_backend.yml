@@ -4,7 +4,11 @@
 # ==================================================
 ---
 - name: Install Backend Server (PHP 8.3 + Nginx + Rust)
+<<<<<<< HEAD
   hosts: peer-prod-backend
+=======
+  hosts: app_servers
+>>>>>>> 1ddf092c14aa8a3a5bab0a04991afde997f69a8c
   become: yes
   
   vars:

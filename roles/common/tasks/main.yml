@@ -6,18 +6,6 @@
 # ==================================================
 
 ---    
-
-### update teh apt cache and list, set set time to 1 hour/Studen
-- name: Update apt cache
-  apt:
-    update_cache: yes
-    cache_valid_time: 3600
-
-### Full update for all packages
-- name: Update all packages to their latest version
-  ansible.builtin.apt:
-    name: "*"
-    state: latest
     
 # Most servers have nginx so creat /www dir
 # Ensure /var/www/html exists (matches Dockerfile WORKDIR)
@@ -37,6 +25,9 @@
       - nginx
       - git
       - unzip
+      - wget
+      - gpg
+      - apt-transport-https
       - curl
       - openssl 
       - libzip-dev
@@ -50,3 +41,35 @@
       - ffmpeg
       - tree
     state: present
+
+### setup for grafana alloy install
+
+# - name: Install Alloy
+#   ansible.builtin.include_role:
+#     name: grafana.grafana.alloy
+#   vars:
+#     alloy_config: |
+#       prometheus.scrape "default" {
+#         targets = [{"__address__" = "localhost:12345"}]
+#         forward_to = [prometheus.remote_write.prom.receiver]
+#       }
+#       prometheus.remote_write "prom" {
+#         endpoint {
+#             url = "<YOUR_PROMETHEUS_PUSH_ENDPOINT>"
+#         }
+#       }
+
+
+### update teh apt cache and list, set set time to 1 hour/Studen
+- name: Update apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  ignore_errors: yes
+
+### Full update for all packages
+- name: Update all packages to their latest version
+  ansible.builtin.apt:
+    name: "*"
+    state: latest
+  ignore_errors: yes
