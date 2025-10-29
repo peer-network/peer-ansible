@@ -16,6 +16,7 @@
     - postgresql-client
     - postgresql-contrib
     - postgresql
+    - python3-pip
   # notify: Restart postgress
 
 - name: "Install Python packages"
