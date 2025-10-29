@@ -17,12 +17,13 @@
     - postgresql-contrib
     - postgresql
     - pipx
+    - python3-psycopg2
   # notify: Restart postgress
 
-- name: "Install Python packages"
-  community.general.pipx: "name={{ item }} state=present"
-  with_items:
-    - psycopg2-binary
+# - name: "Install Python packages"
+#   community.general.pipx: "name={{ item }} state=present"
+#   with_items:
+#     - psycopg2-binary
 
 - name: "Find out if PostgreSQL is initialized"
   ansible.builtin.stat:
