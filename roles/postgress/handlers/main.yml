@@ -1,0 +1,13 @@
+# ==================================================
+# FILE: roles/postgress/handlers/main.yml (database)
+# ==================================================
+---
+- name: postgresql-client
+  systemd:
+    name: psql
+    state: restarted
+
+- name: Reload postgress
+  systemd:
+    name: psql
+    state: reloaded

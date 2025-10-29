@@ -1,0 +1,10 @@
+# ==================================================
+# FILE: roles/backend/meta/main.yml
+# Backend role dependencies (follows bash script order)
+# ==================================================
+---
+dependencies:
+  - role: common          # STEP 1
+  - role: postgress       # STEP 2, 3
+  - role: nginx           # STEP 4
+  - role: www_permissions # STEP 5
