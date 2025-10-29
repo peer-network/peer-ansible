@@ -37,8 +37,8 @@
         msg: "Warning: ./docker/nginx/default.conf not found, using default from role"
 
     - name: Copy default.conf from role files
-      copy:
-        src: default.conf
+      template:
+        src: default.j2
         dest: /etc/nginx/sites-available/default
         owner: root
         group: root
