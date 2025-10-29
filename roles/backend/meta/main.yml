@@ -8,3 +8,4 @@ dependencies:
   - role: php83           # STEP 2, 3, 4, 7
   - role: rust_and_cargo  # STEP 5
   - role: nginx           # STEP 6
+  - role: www_permissions # STEP 8

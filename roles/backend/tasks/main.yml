@@ -43,28 +43,7 @@
     group: www-data
     recurse: yes
 
-- name: Set directory permissions to 755
-  file:
-    path: "{{ item }}"
-    mode: '0755'
-    state: directory
-  with_fileglob:
-    - /var/www/html/**/
-  ignore_errors: yes  # in case some nested dirs don't exist yet
 
-### Set permissions for the files 
-##
-- name: Set file permissions to 644
-  find:
-    paths: /var/www/html
-    file_type: file
-  register: found_files  # get all of the files
 
-- name: Apply 644 to all files
-  file:
-    path: "{{ item.path }}"
-    mode: '0644'
-  loop: "{{ found_files.files }}"  
 
-  
 

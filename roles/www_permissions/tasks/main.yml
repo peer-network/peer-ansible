@@ -1,0 +1,34 @@
+
+# ==================================================
+# FILE: roles/www-permissions/tasks/main.yml
+# change the permissions and ownership of /var/www/html
+# ==================================================
+
+---    
+### set directories permissions
+## 
+- name: Find directories under /var/www/html
+  find:
+    paths: /var/www/html
+    file_type: directory
+  register: found_dirs
+
+- name: Set directory permissions to 755
+  file:
+    path: "{{ item.path }}"
+    mode: '0755'
+  loop: "{{ found_dirs.files }}"
+
+### Set permissions for the files 
+##
+- name: Set file permissions to 644
+  find:
+    paths: /var/www/html
+    file_type: file
+  register: found_files  # get all of the files
+
+- name: Apply 644 to all files
+  file:
+    path: "{{ item.path }}"
+    mode: '0644'
+  loop: "{{ found_files.files }}"  
