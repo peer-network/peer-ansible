@@ -9,51 +9,151 @@
     update_cache: yes
     cache_valid_time: 3600
 
-  
+## Install dependences and postgres  
 - name: "Install packages"
   apt: "name={{ item }} state=present"
   with_items:
     - postgresql-client
     - postgresql-contrib
     - postgresql
-    - pipx
     - python3-psycopg2
+    # - pipx
   # notify: Restart postgress
 
-# - name: "Install Python packages"
-#   community.general.pipx: "name={{ item }} state=present"
-#   with_items:
-#     - psycopg2-binary
 
-- name: "Find out if PostgreSQL is initialized"
-  ansible.builtin.stat:
-    path: "/var/lib/pgsql/data/pg_hba.conf"
-  register: postgres_data
+- name: Ping PostgreSQL
+  postgresql_ping:
+    db: postgres
+    login_unix_socket: "/var/run/postgresql"
+    login_user: peer
+  become: yes
+  become_user: peer
+  register: postgres_peer
 
-- name: "Initialize PostgreSQL"
-  shell: "postgresql-setup initdb"
-  when: not postgres_data.stat.exists
+- name: Display database status message
+  debug:
+    msg:
+      - "✓ PostgreSQL Errors{{ postgres_peer.stderr }}"
+      - "  Database 'peer' status {{ postgres_peer.stdout }}  
 
-- name: "Start and enable services"
-  service: "name={{ item }} state=started enabled=yes"
-  with_items:
-    - postgresql
-
-### sudo systemctl status postgresql
-##
-- name: Check if postgress is running
-  command: systemctl status postgres
-  ignore_errors: yes
-  changed_when: false
-  register: service_postgress_status
-
-- name: Report status of postgress
-  fail:
-    msg: |
-      Service postgres is not running.
-      Output of `systemctl status postgres`:
-      {{ service_postgress_status.stdout }}
-      {{ service_postgress_status.stderr }}
-  when: service_postgress_status | failed
+- name: Check if database 'peer' exists
+  become: yes
+  become_user: postgres
+  postgresql_db:
+    name: peer
+    state: present
+  register: db_created
 
 
+- name: Display database creation status
+  debug:
+    msg: "{{ 'Database peer created' if db_created.changed else 'Database peer already exists' }}"
+
+- name: Check if SQL structure file exists
+  stat:
+    path: "{{ sql_structure_file }}"
+  register: structure_file
+  when: sql_structure_file is defined
+
+- name: Import structure into PostgreSQL database
+  become: yes
+  become_user: postgres
+  postgresql_query:
+    db: peer
+    path_to_script: "{{ sql_structure_file }}"
+  when: 
+    - sql_structure_file is defined
+    - structure_file.stat.exists
+  register: structure_import
+
+- name: Display structure import status
+  debug:
+    msg: "Structure imported from {{ sql_structure_file }}"
+  when: 
+    - structure_import is defined
+    - structure_import.changed
+
+- name: Check if optional data file exists
+  stat:
+    path: "{{ sql_optional_data_file }}"
+  register: optional_file
+  when: sql_optional_data_file is defined
+
+- name: Import optional data into PostgreSQL database
+  become: yes
+  become_user: postgres
+  postgresql_query:
+    db: peer
+    path_to_script: "{{ sql_optional_data_file }}"
+  when:
+    - sql_optional_data_file is defined
+    - optional_file.stat.exists
+  register: optional_import
+
+- name: Display optional data import status
+  debug:
+    msg: "Optional data imported from {{ sql_optional_data_file }}"
+  when:
+    - optional_import is defined
+    - optional_import.changed
+
+- name: Create PostgreSQL user 'peer_beta'
+  become: yes
+  become_user: postgres
+  postgresql_user:
+    name: peer_beta
+    password: "{{ postgres_peer_beta_password }}"
+    state: present
+    encrypted: yes
+
+- name: Grant table permissions to peer_beta on existing tables
+  become: yes
+  become_user: postgres
+  postgresql_privs:
+    database: peer
+    state: present
+    privs: SELECT,INSERT,UPDATE,DELETE
+    type: table
+    objs: ALL_IN_SCHEMA
+    schema: public
+    role: peer_beta
+
+- name: Grant default table permissions for new tables
+  become: yes
+  become_user: postgres
+  postgresql_query:
+    db: peer
+    query: "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO peer_beta;"
+
+- name: Grant sequence permissions to peer_beta on existing sequences
+  become: yes
+  become_user: postgres
+  postgresql_privs:
+    database: peer
+    state: present
+    privs: USAGE,SELECT
+    type: sequence
+    objs: ALL_IN_SCHEMA
+    schema: public
+    role: peer_beta
+
+- name: Grant default sequence permissions for new sequences
+  become: yes
+  become_user: postgres
+  postgresql_query:
+    db: peer
+    query: "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO peer_beta;"
+
+- name: Display completion message
+  debug:
+    msg:
+      - "✓ PostgreSQL setup complete"
+      - "  - Database 'peer' created"
+      - "  - User 'peer_beta' created with permissions"
+      - "  - Grants configured for tables and sequences"
+      - ""
+      - "Connection details:"
+      - "  Host: {{ Internal_IP_target }}"
+      - "  Port: {{ psql_port }}"
+      - "  Database: peer"
+      - "  User: peer_beta"
