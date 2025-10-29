@@ -34,7 +34,7 @@
   debug:
     msg:
       - "✓ PostgreSQL Errors{{ postgres_peer.stderr }}"
-      - "  Database 'peer' status {{ postgres_peer.stdout }}  
+      - "  Database 'peer' status {{ postgres_peer.stdout }}"  
 
 - name: Check if database 'peer' exists
   become: yes
