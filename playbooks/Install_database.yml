@@ -10,9 +10,9 @@
   
   vars:
     # You can override these in your inventory
-    Internal_IP_target: "192.168.2.97"
+    Internal_IP_target: "192.168.1.210"  # database IP 
     Internal_Backend: "192.168.1.200"
-    External_IP_target: "10.5.2.186"
+    External_IP_target: "162.19.169.215"  # Host IP
     psql_port: 5432
     php_max_execution_time: "3600"
     # ansible_user: "{{ ansible_user | default('peer') }}"

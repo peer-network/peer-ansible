@@ -9,36 +9,49 @@
     update_cache: yes
     cache_valid_time: 3600
 
-- name: Install postgress-client
-  apt:
-    name: 
+  
+- name: "Install packages"
+  apt: "name={{ item }} state=present"
+  with_items:
     - postgresql-client
-    state: present
+    - postgresql
+    - postgresql-server
   notify: Restart postgress
 
-- name: chcek if postgress is running
-  
+- name: "Install Python packages"
+  pip: "name={{ item }} state=present"
+  with_items:
+    - psycopg2-binary
+
+- name: "Find out if PostgreSQL is initialized"
+  ansible.builtin.stat:
+    path: "/var/lib/pgsql/data/pg_hba.conf"
+  register: postgres_data
+
+- name: "Initialize PostgreSQL"
+  shell: "postgresql-setup initdb"
+  when: not postgres_data.stat.exists
+
+- name: "Start and enable services"
+  service: "name={{ item }} state=started enabled=yes"
+  with_items:
+    - postgresql
+
+### sudo systemctl status postgresql
+##
+- name: Check if postgress is running
+  command: systemctl status postgres
+  ignore_errors: yes
+  changed_when: false
+  register: service_postgress_status
+
+- name: Report status of postgress
+  fail:
+    msg: |
+      Service postgres is not running.
+      Output of `systemctl status postgres`:
+      {{ service_postgress_status.stdout }}
+      {{ service_postgress_status.stderr }}
+  when: service_postgress_status | failed
 
 
-- name: Install PHP 8.3 and common extensions
-  apt:
-    name:
-      - php8.3
-      - php8.3-fpm
-      - php8.3-cli
-      - php8.3-common
-      - php8.3-mysql
-      - php8.3-pgsql
-      - php8.3-xml
-      - php8.3-curl
-      - php8.3-gd
-      - php8.3-mbstring
-      - php8.3-zip
-      - php8.3-bcmath
-      - php8.3-intl
-      - php8.3-readline
-      - php8.3-opcache
-      - php8.3-gmp
-      - php8.3-pdo
-      - php8.3-ffi
-    state: present
