@@ -16,11 +16,11 @@
     - postgresql-client
     - postgresql-contrib
     - postgresql
-    - python3-pip
+    - pipx
   # notify: Restart postgress
 
 - name: "Install Python packages"
-  pip: "name={{ item }} state=present"
+  community.general.pipx: "name={{ item }} state=present"
   with_items:
     - psycopg2-binary
 
