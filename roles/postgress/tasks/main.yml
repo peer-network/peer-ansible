@@ -33,8 +33,8 @@
 - name: Display database status message
   debug:
     msg:
-      - "✓ PostgreSQL Errors{{ postgres_peer.stderr }}"
-      - "  Database 'peer' status {{ postgres_peer.stdout }}"  
+      - "✓ PostgreSQL Errors{{ postgres_peer.stderr if 'stderr' in postgres_peer else 'stderr not found' }}"
+      - "  Database 'peer' status {{ postgres_peer.stdout if 'stdout' in postgres_peer else 'stdout not found' }}"  
 
 - name: Check if database 'peer' exists
   become: yes
