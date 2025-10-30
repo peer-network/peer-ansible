@@ -4,6 +4,12 @@
 # ==================================================
 ---
 
+- vars:
+  
+
+
+- pre_tasks:
+  - name: create postgres user password
 
 
     # - name: "Create app database"

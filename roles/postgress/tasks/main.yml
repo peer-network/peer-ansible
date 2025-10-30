@@ -38,9 +38,9 @@
 
 - name: Check if database 'peer' exists
   become: yes
-  become_user: postgres
+  become_user: peer
   postgresql_db:
-    name: peer
+    name: "{{ database_name }}"
     state: present
   register: db_created
 
