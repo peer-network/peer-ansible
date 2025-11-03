@@ -36,11 +36,17 @@
 
     - name: Write password to file
       ansible.builtin.lineinfile:
-        line: "{{ password  }}"
+        line: "{{ password }}"
         insertafter: EOF
         create: true
         path: "{{path_to_file_on_host}}"
       when: not file_state.stat.exists
+
+    - name: debug password
+      debug:
+        msg:
+          - "password generated {{ password }}"
+          - "Is file there {{ file_state }}"
 
     - name: Retrive password if file present
       ansible.builtin.set_fact:
