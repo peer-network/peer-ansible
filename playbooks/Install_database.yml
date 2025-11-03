@@ -4,49 +4,45 @@
 # ==================================================
 ---
 
-- name: Install database Server (Postgress)
-  hosts: peer-prod-database
-  become: yes
+vars:
+  database_name: "peer"
+  database_user: "peer_prod" 
+  path_to_file_on_host: '/etc/postgres-common/passcode'
+
+  # You can override these in your inventory
+  Internal_IP_target: "192.168.1.210"  # database IP 
+  Internal_Backend: "192.168.1.200"
+  External_IP_target: "162.19.169.215"  # Host IP
+  psql_port: 5432
+  php_max_execution_time: "3600"
+
   
-  vars:
-    # You can override these in your inventory
-    Internal_IP_target: "192.168.1.210"  # database IP 
-    Internal_Backend: "192.168.1.200"
-    External_IP_target: "162.19.169.215"  # Host IP
-    psql_port: 5432
-    php_max_execution_time: "3600"
-    database_name: "peer"
-    database_user: "peer_prod" 
-    path_to_file_on_host: '/etc/postgres-common/passcode'
+### Make or use password for the postgres database
+##  
+pre_tasks:
 
-    # ansible_user: "{{ ansible_user | default('peer') }}"
+- name: Check if password file exists 
+  ansible.builtin.stat:
+    path: "{{path_to_file_on_host}}"
+  register: file_state
 
-  ### Make or use password for the postgres database
-  ##  
-  pre_tasks:
-    - name: Check if password file exists 
-      ansible.builtin.stat:
-        path: "{{path_to_file_on_host}}"
-      register: file_state
-    
-    - name: create random password if file absent
-      ansible.builtin.set_fact:
-        password: "{{ lookup('ansible.builtin.password', '/dev/null', length=256 ,chars=['ascii_letters', 'digits']) }}"
-      when: not file_state.stat.exists
+- name: create random password if file absent
+  ansible.builtin.set_fact:
+    password: "{{ lookup('ansible.builtin.password', '/dev/null', length=256 ,chars=['ascii_letters', 'digits']) }}"
+  when: not file_state.stat.exists
 
-    - name: Write password to file
-      ansible.builtin.lineinfile:
-        line: "{{ password  }}"
-        insertafter: EOF
-        create: true
-        path: "{{path_to_file_on_host}}"
-      when: not file_state.stat.exists
-    
-    - name: Retrive password if file present
-      ansible.builtin.set_fact:
-        postgres_password: "{{ lookup('ansible.builtin.file', path_to_file_on_host) }}"
-      when: file_state.stat.exists
+- name: Write password to file
+  ansible.builtin.lineinfile:
+    line: "{{ password  }}"
+    insertafter: EOF
+    create: true
+    path: "{{path_to_file_on_host}}"
+  when: not file_state.stat.exists
 
+- name: Retrive password if file present
+  ansible.builtin.set_fact:
+    postgres_password: "{{ lookup('ansible.builtin.file', path_to_file_on_host) }}"
+  when: file_state.stat.exists
 
   ### Thisis a role of roles, as 'backend' will call other roles  
   roles:
