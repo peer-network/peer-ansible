@@ -32,6 +32,7 @@
     - name: create random password if file absent
       ansible.builtin.set_fact:
         password: "{{ lookup('ansible.builtin.password', '/dev/null', length=256 ,chars=['ascii_letters', 'digits']) }}"
+      register: password
       when: not file_state.stat.exists
 
     - name: Write password to file
@@ -39,7 +40,8 @@
         line: "{{ password }}"
         insertafter: EOF
         create: true
-        path: "{{path_to_file_on_host}}"
+        path: "{{ path_to_file_on_host }}"
+      register: path_to_file_on_host
       when: not file_state.stat.exists
 
     - name: debug password
@@ -47,6 +49,7 @@
         msg:
           - "password generated {{ password }}"
           - "Is file there {{ file_state }}"
+          - "Path to host {{ path_to_file_on_host }}"
 
     - name: Retrive password if file present
       ansible.builtin.set_fact:
