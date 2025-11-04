@@ -27,12 +27,12 @@
 ##  
   pre_tasks:
 
-  - name: Check for vars_files
+  - name: Check for peer-prod-database
     ansible.builtin.stat:
       path: /home/ubuntu/ansible/host_vars/peer-prod-database.yml
     register: peer_prod_db_stat
 
-  - name: Check for vars_files
+  - name: Check for '.passcode'
     ansible.builtin.stat:
       path: /home/ubuntu/ansible/.passcode
     register: peer_prod_pass_stat
