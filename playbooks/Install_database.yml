@@ -38,6 +38,7 @@
     register: peer_prod_pass_stat
 
 - name: BLOCK — Check files for the database
+  when: not peer_prod_db_stat.stat.exists or not peer_prod_pass_stat.stat.exists
   block:
     - name: Fail if required files are missing
       ansible.builtin.fail:
@@ -46,8 +47,7 @@
           {{ 'peer-prod-database.yml' if not peer_prod_db_stat.stat.exists else '' }}
           {{ '.passcode' if not peer_prod_pass_stat.stat.exists else '' }}
     - ansible.builtin.meta: end_play
-  when:
-    - not peer_prod_db_stat.stat.exists or not peer_prod_pass_stat.stat.exists
+
 
   ### Thisis a role of roles, as 'backend' will call other roles  
   roles:
