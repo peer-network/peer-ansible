@@ -8,10 +8,15 @@
   hosts: peer-prod-database
   become: yes
 
+  vars_files:
+    - ../peer-prod-database.yml
+
   vars:
     database_name: "peer"
     database_user: "peer_prod" 
     path_to_file_on_host: '/etc/postgres-common/passcode'
+
+
 
     # You can override these in your inventory
     Internal_IP_target: "192.168.1.210"  # database IP 
@@ -24,6 +29,12 @@
 ### Make or use password for the postgres database
 ##  
   pre_tasks:
+    - name: debug password
+      debug:
+        msg:
+          - "testing root {{ testing root }}"
+          - "testing peer_beta {{ testing peer_beta }}"
+
     - name: Check if password file exists 
       ansible.builtin.stat:
         path: "{{path_to_file_on_host}}"
