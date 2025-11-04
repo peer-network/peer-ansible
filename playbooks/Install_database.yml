@@ -26,43 +26,33 @@
 ### Make or use password for the postgres database
 ##  
   pre_tasks:
-    - name: debug password
-      ansible.builtin.debug:
-        msg:
-          - testing root "{{ testing_root }}"
-          - testing peer_beta "{{ testing_peer_beta }}"
 
-    - name: Check if password file exists 
-      ansible.builtin.stat:
-        path: "{{path_to_file_on_host}}"
-      register: file_state
+  - name: BLOCK- Chcek files for the database
+    when: (peer_prod_db_stat.stdout not defined or  eer_prod_pass_stat.stdout not defined)
+    block:
+      - name: Check for vars_files
+        ansible.builtin.stat:
+        path: ../host_vars/peer-prod-database.yml
+        register: peer_prod_db_stat
 
-    - name: create random password if file absent
-      ansible.builtin.set_fact:
-        password: "{{ lookup('ansible.builtin.password', '/dev/null', length=256 ,chars=['ascii_letters', 'digits']) }}"
-      register: password
-      when: not file_state.stat.exists
+      - name: Check for vars_files
+        ansible.builtin.stat:
+        path: ../.passcode
+        register: peer_prod_pass_stat
 
-    - name: Write password to file
-      ansible.builtin.lineinfile:
-        line: "{{ password }}"
-        insertafter: EOF
-        create: true
-        path: "{{ path_to_file_on_host }}"
-      register: path_to_file_on_host
-      when: not file_state.stat.exists
+      - name: "end play if peer_prod_database.yml not found"
+        debug:
+          msg: 
+            - "Ending play: peer_prod_database.yml is not at ../host_vars/peer-prod-database.yml"
+            - "         Or: .passcode file is missing.  Plase check if these files are present."
+      # rescue and always can be placed here
+      - meta: end_play
 
-    - name: debug password
-      debug:
-        msg:
-          - "password generated {{ password }}"
-          - "Is file there {{ file_state }}"
-          - "Path to host {{ path_to_file_on_host }}"
 
-    - name: Retrive password if file present
-      ansible.builtin.set_fact:
-        postgres_password: "{{ lookup('ansible.builtin.file', path_to_file_on_host) }}"
-      when: file_state.stat.exists
+
+  - name: Print a debug message
+    ansible.builtin.debug:
+      msg: "stat for database {{ peer_prod_db_stat }}"
 
   ### Thisis a role of roles, as 'backend' will call other roles  
   roles:
