@@ -37,21 +37,17 @@
       path: ../.passcode
     register: peer_prod_pass_stat
 
-  - name: BLOCK- Chcek files for the database
-    when: (peer_prod_db_stat.stdout not defined or  eer_prod_pass_stat.stdout not defined)
-    block:
-
-      - name: "end play if peer_prod_database.yml not found"
-        debug:
-          msg: 
-            - "Ending play: peer_prod_database.yml is not at ../host_vars/peer-prod-database.yml"
-            - "         Or: .passcode file is missing.  Plase check if these files are present."
-      # rescue and always can be placed here
-      - meta: end_play
-
-  - name: Print a debug message
-    ansible.builtin.debug:
-      msg: "stat for database {{ peer_prod_db_stat }}"
+- name: BLOCK — Check files for the database
+  block:
+    - name: Fail if required files are missing
+      ansible.builtin.fail:
+        msg: >
+          Missing one or more required files:
+          {{ 'peer-prod-database.yml' if not peer_prod_db_stat.stat.exists else '' }}
+          {{ '.passcode' if not peer_prod_pass_stat.stat.exists else '' }}
+    - ansible.builtin.meta: end_play
+  when:
+    - not peer_prod_db_stat.stat.exists or not peer_prod_pass_stat.stat.exists
 
   ### Thisis a role of roles, as 'backend' will call other roles  
   roles:
