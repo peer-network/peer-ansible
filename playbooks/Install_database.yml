@@ -29,12 +29,12 @@
 
   - name: Check for vars_files
     ansible.builtin.stat:
-      path: ../host_vars/peer-prod-database.yml
+      path: host_vars/peer-prod-database.yml
     register: peer_prod_db_stat
 
   - name: Check for vars_files
     ansible.builtin.stat:
-      path: ../.passcode
+      path: .passcode
     register: peer_prod_pass_stat
 
   - name: BLOCK — Check files for the database
