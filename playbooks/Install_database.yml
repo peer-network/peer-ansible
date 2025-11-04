@@ -31,11 +31,13 @@
     ansible.builtin.stat:
       path: /home/ubuntu/ansible/host_vars/peer-prod-database.yml
     register: peer_prod_db_stat
+    delegate_to: localhost
 
   - name: Check for '.passcode'
     ansible.builtin.stat:
       path: /home/ubuntu/ansible/.passcode
     register: peer_prod_pass_stat
+    delegate_to: localhost
 
   - name: BLOCK — Check files for the database
     when: not peer_prod_db_stat.stat.exists or not peer_prod_pass_stat.stat.exists
