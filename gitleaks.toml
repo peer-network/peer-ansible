@@ -1,0 +1,55 @@
+title = "Peer Ansible Gitleaks Config"
+
+[[rules]]
+id = "infra-catch-common-secrets"
+description = "Catch common infrastructure secrets (Terraform, Ansible, Grafana, SSH, API keys)"
+regex = '''(?i)(ghp_[0-9A-Za-z]{36}|github_pat_[0-9A-Za-z_]{20,}|glpat-[0-9A-Za-z\-_]{20}|AKIA[0-9A-Z]{16}|ASIA[0-9A-Z]{16}|[A-Za-z0-9]{20,}:[A-Za-z0-9+/]{40,}|eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+\.[A-Za-z0-9._-]+|-----BEGIN( RSA| DSA| EC| OPENSSH)? PRIVATE KEY-----|token\s*=\s*["'][A-Za-z0-9_\-]{10,}["']|password\s*=\s*["'][^"']{6,}["'])'''
+tags = ["key", "secret", "ansible", "infrastructure"]
+
+[[rules]]
+id = "ansible-vault-passwords"
+description = "Detect Ansible vault password strings accidentally committed unencrypted"
+regex = '''(?i)(vault_password\s*[:=]\s*["']?[A-Za-z0-9_\-]{8,}["']?)'''
+tags = ["ansible", "vault", "secret"]
+
+[[rules]]
+id = "grafana-api-tokens"
+description = "Detect Grafana, Loki, or Prometheus API tokens"
+regex = '''(?i)(grafana[_-]api[_-]?key\s*[:=]\s*["']?[A-Za-z0-9_-]{20,}|bearer\s+[A-Za-z0-9\-_]{20,})'''
+tags = ["grafana", "api", "key"]
+
+[[rules]]
+id = "terraform-provider-secrets"
+description = "Catch potential provider secrets in Terraform (.tf) files"
+regex = '''(?i)(access[_-]?key\s*=\s*["'][A-Za-z0-9/+=]{16,}["']|secret[_-]?key\s*=\s*["'][A-Za-z0-9/+=]{32,}["']|client[_-]?secret\s*=\s*["'][A-Za-z0-9/+=]{20,}["'])'''
+tags = ["terraform", "provider", "key"]
+
+[rules.allowlist]
+description = "Ignore Ansible templating syntax and variables"
+regexes = [
+  '''{{.*}}''',
+  '''ansible_[a-z_]+''',
+  '''vars\.[a-z_]+''',
+  '''inventory_hostname''',
+  '''playbook_path''',
+  '''group_names''',
+  '''hostvars\[.*\]'''
+]
+
+[pathDenylist]
+description = "Exclude irrelevant or generated files"
+regexes = [
+  '''^\.terraform/.*''',
+  '''^\.terraform\.lock\.hcl$''',
+  '''^terraform\.tfstate.*$''',
+  '''^node_modules/.*''',
+  '''^__pycache__/.*''',
+  '''^\.venv/.*''',
+  '''^dist/.*''',
+  '''^build/.*''',
+  '''^coverage/.*''',
+  '''^\.github/workflows/.*''',
+  '''^logs?/.*''',
+  '''^tmp/.*''',
+  '''^\.env.*$'''
+]
