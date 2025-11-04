@@ -9,7 +9,7 @@
   become: yes
 
   vars_files:
-    - ../peer-prod-database.yml
+    - ../host_vars/peer-prod-database.yml
 
   vars:
     database_name: "peer"
