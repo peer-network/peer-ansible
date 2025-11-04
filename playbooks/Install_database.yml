@@ -26,12 +26,30 @@
 ### Make or use password for the postgres database
 ##  
   pre_tasks:
-    - name: debug password
-      ansible.builtin.debug:
-        msg:
-          - testing root "{{ testing_root }}"
-          - testing peer_beta "{{ testing_peer_beta }}"
 
+  - block:
+      - name: Check for vars_files
+        ansible.builtin.stat:
+        path: ../host_vars/peer-prod-database.yml
+        register: peer_prod_db_stat
+
+      - name: Check for vars_files
+        ansible.builtin.stat:
+        path: ../.passcode
+        register: peer_prod_pass_stat
+
+      - name: "end play if peer_prod_database.yml not found"
+        debug:
+          msg: 
+            - "Ending play: peer_prod_database.yml is not at ../host_vars/peer-prod-database.yml"
+            - "         Or: .passcode file is missing.  Plase check if these files are present."
+
+      - meta: end_play
+    when: (peer_prod_db_stat.stdout not defined or  eer_prod_pass_stat.stdout not defined)
+
+  - name: Print a debug message
+    ansible.builtin.debug:
+      msg: "stat for database {{ peer_prod_db_stat }}"
 
   ### Thisis a role of roles, as 'backend' will call other roles  
   roles:
