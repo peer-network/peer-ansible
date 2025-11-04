@@ -27,25 +27,28 @@
 ##  
   pre_tasks:
 
-  - block:
-    - name: Check for vars_files
-      ansible.builtin.stat:
-      path: ../host_vars/peer-prod-database.yml
-      register: peer_prod_db_stat
-
-    - name: Check for vars_files
-      ansible.builtin.stat:
-      path: ../.passcode
-      register: peer_prod_pass_stat
-
-    - name: "end play if peer_prod_database.yml not found"
-      debug:
-        msg: 
-          - "Ending play: peer_prod_database.yml is not at ../host_vars/peer-prod-database.yml"
-          - "         Or: .passcode file is missing.  Plase check if these files are present."
-
-    - meta: end_play
+  - name: BLOCK- Chcek files for the database
     when: (peer_prod_db_stat.stdout not defined or  eer_prod_pass_stat.stdout not defined)
+    block:
+      - name: Check for vars_files
+        ansible.builtin.stat:
+        path: ../host_vars/peer-prod-database.yml
+        register: peer_prod_db_stat
+
+      - name: Check for vars_files
+        ansible.builtin.stat:
+        path: ../.passcode
+        register: peer_prod_pass_stat
+
+      - name: "end play if peer_prod_database.yml not found"
+        debug:
+          msg: 
+            - "Ending play: peer_prod_database.yml is not at ../host_vars/peer-prod-database.yml"
+            - "         Or: .passcode file is missing.  Plase check if these files are present."
+      # rescue and always can be placed here
+      - meta: end_play
+
+
 
   - name: Print a debug message
     ansible.builtin.debug:
