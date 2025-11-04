@@ -15,9 +15,6 @@
     database_name: "peer"
     database_user: "peer_prod" 
     path_to_file_on_host: '/etc/postgres-common/passcode'
-
-
-
     # You can override these in your inventory
     Internal_IP_target: "192.168.1.210"  # database IP 
     Internal_Backend: "192.168.1.200"
