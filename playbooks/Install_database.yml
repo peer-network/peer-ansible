@@ -29,13 +29,13 @@
 
   - name: Check for peer-prod-database
     ansible.builtin.stat:
-      path: /home/ubuntu/ansible/host_vars/peer-prod-database.yml
+      path: /home/peer/ansible/host_vars/peer-prod-database.yml
     register: peer_prod_db_stat
     delegate_to: 127.0.0.1
 
   - name: Check for '.passcode'
     ansible.builtin.stat:
-      path: /home/ubuntu/ansible/.passcode
+      path: /home/peer/ansible/.passcode
     register: peer_prod_pass_stat
     delegate_to: 127.0.0.1
 
