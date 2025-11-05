@@ -2,3 +2,7 @@
 ##
 ---
 gateway_ip: "192.168.1.1"
+Internal_Database: "192.168.1.210"   # Database server IP
+Bastion_IP: "192.168.1.10"           # Bastion server
+Internal_Backend: "192.168.1.200"    # Backend server IP
+External_IP_target: "162.19.169.215" # Host IP

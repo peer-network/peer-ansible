@@ -16,13 +16,16 @@
     database_user: "peer_prod" 
     path_to_file_on_host: '/etc/postgres-common/passcode'
     # You can override these in your inventory
-    Internal_IP_target: "192.168.1.210"  # database IP 
-    Internal_Backend: "192.168.1.200"
-    External_IP_target: "162.19.169.215"  # Host IP
+    # Internal_Database: "192.168.1.210"   # Database server IP
+    # Bastion_IP: "192.168.1.10"           # Bastion server
+    # Internal_Backend: "192.168.1.200"    # Backend server IP
+    # External_IP_target: "162.19.169.215" # Host IP
     psql_port: 5432
     php_max_execution_time: "3600"
 
-  
+    # Database configuration
+    database_password: "change_me_in_vault"  # Override with vault
+
 ### Make or use password for the postgres database
 ##  
   pre_tasks:
@@ -49,7 +52,6 @@
             {{ 'peer-prod-database.yml' if not peer_prod_db_stat.stat.exists else '' }}
             {{ '.passcode' if not peer_prod_pass_stat.stat.exists else '' }}
       - ansible.builtin.meta: end_play
-
 
   ### Thisis a role of roles, as 'backend' will call other roles  
   roles:
