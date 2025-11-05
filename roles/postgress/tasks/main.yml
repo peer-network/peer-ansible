@@ -19,22 +19,159 @@
     - python3-psycopg2
     # - pipx
   # notify: Restart postgress
+    
 
-
-- name: Ping PostgreSQL
-  postgresql_ping:
-    db: postgres
-    login_unix_socket: "/var/run/postgresql"
-    login_user: peer
+- name: Check if database 'peer' exists
   become: yes
-  become_user: peer
-  register: postgres_peer
+  become_user: postgres  # Connect as postgres superuser
+  postgresql_db:
+    name: "{{ database_name }}"
+    state: present
+    login_unix_socket: /var/run/postgresql
+  register: db_created
 
-- name: Display database status message
+- name: Display database creation status
   debug:
-    msg:
-      - "✓ PostgreSQL Errors{{ postgres_peer.stderr if 'stderr' in postgres_peer else 'stderr not found' }}"
-      - "  Database 'peer' status {{ postgres_peer.stdout if 'stdout' in postgres_peer else 'stdout not found' }}"  
+    msg: "{{ 'Database created' if db_created.changed else 'Database already exists' }}"
+
+- name: BLOCK create peer database
+  when: db_created is not defined
+  block:
+    - name: Read password from file if it exists
+      slurp:
+        path: "{{ path_to_file_on_host }}"
+      register: password_file_content
+      when: path_to_file_on_host is defined
+      ignore_errors: yes
+
+    - name: Set password from file or use default
+      set_fact:
+        actual_password: "{{ password_file_content['content'] | b64decode | trim if password_file_content is success else database_password }}"
+
+    - name: Create PostgreSQL user
+      become: yes
+      become_user: postgres
+      postgresql_user:
+        name: "{{ database_user }}"
+        password: "{{ actual_password }}"
+        state: present
+        login_unix_socket: /var/run/postgresql
+      no_log: true  # Don't log password
+
+    - name: Grant table permissions to user
+      become: yes
+      become_user: postgres
+      postgresql_privs:
+        database: "{{ database_name }}"
+        state: present
+        privs: SELECT,INSERT,UPDATE,DELETE
+        type: table
+        objs: ALL_IN_SCHEMA
+        schema: public
+        role: "{{ database_user }}"
+        login_unix_socket: /var/run/postgresql
+
+    - name: Grant default table privileges for new tables
+      become: yes
+      become_user: postgres
+      postgresql_query:
+        db: "{{ database_name }}"
+        query: "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO {{ database_user }};"
+        login_unix_socket: /var/run/postgresql
+
+    - name: Grant sequence permissions to user
+      become: yes
+      become_user: postgres
+      postgresql_privs:
+        database: "{{ database_name }}"
+        state: present
+        privs: USAGE,SELECT
+        type: sequence
+        objs: ALL_IN_SCHEMA
+        schema: public
+        role: "{{ database_user }}"
+        login_unix_socket: /var/run/postgresql
+
+    - name: Grant default sequence privileges for new sequences
+      become: yes
+      become_user: postgres
+      postgresql_query:
+        db: "{{ database_name }}"
+        query: "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO {{ database_user }};"
+        login_unix_socket: /var/run/postgresql
+
+    - name: Ensure PostgreSQL is listening on correct interface
+      lineinfile:
+        path: /etc/postgresql/*/main/postgresql.conf
+        regexp: '^#?listen_addresses'
+        line: "listen_addresses = '{{ Internal_Database }}'"
+        backup: yes
+      notify: Restart PostgreSQL
+
+    - name: Configure pg_hba.conf for network access
+      blockinfile:
+        path: /etc/postgresql/*/main/pg_hba.conf
+        marker: "# {mark} ANSIBLE MANAGED - Backend Access"
+        block: |
+          # Allow backend server to connect
+          host    {{ database_name }}    {{ database_user }}    {{ Internal_Backend }}/32    md5
+          # Allow connections from same network
+          host    {{ database_name }}    {{ database_user }}    192.168.1.0/24         md5
+        backup: yes
+      notify: Restart PostgreSQL
+
+
+### Import data for database
+##   
+- name: BLOCK import data to database
+  when: db_created is defined
+  block:
+    - name: Check if structure SQL file exists on remote host
+      stat:
+        path: "{{ sql_structure_file }}"
+      register: structure_file
+      when: sql_structure_file is defined
+
+    - name: Import structure into PostgreSQL
+      become: yes
+      become_user: postgres
+      shell: |
+        psql -d {{ database_name }} -f {{ sql_structure_file }}
+      when:
+        - sql_structure_file is defined
+        - structure_file.stat.exists
+      register: structure_import
+
+    - name: Display structure import result
+      debug:
+        msg: "Structure imported from {{ sql_structure_file }}"
+      when:
+        - structure_import is defined
+        - structure_import.changed
+
+    - name: Check if optional data SQL file exists on remote host
+      stat:
+        path: "{{ sql_optional_data_file }}"
+      register: optional_file
+      when: sql_optional_data_file is defined
+
+    - name: Import optional data into PostgreSQL
+      become: yes
+      become_user: postgres
+      shell: |
+        psql -d {{ database_name }} -f {{ sql_optional_data_file }}
+      when:
+        - sql_optional_data_file is defined
+        - optional_file.stat.exists
+      register: optional_import
+
+    - name: Display optional data import result
+      debug:
+        msg: "Optional data imported from {{ sql_optional_data_file }}"
+      when:
+        - optional_import is defined
+        - optional_import.changed
+
 
 - name: Check if database 'peer' exists
   become: yes

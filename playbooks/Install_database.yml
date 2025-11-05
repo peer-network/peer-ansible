@@ -25,6 +25,9 @@
 
     # Database configuration
     database_password: "change_me_in_vault"  # Override with vault
+    # SQL files to import (update these paths!)
+    sql_structure_file: "/home/peer/db_files/structure.sql"
+    sql_optional_data_file: "/home/peer/db_files/optional_data.sql"
 
 ### Make or use password for the postgres database
 ##  
