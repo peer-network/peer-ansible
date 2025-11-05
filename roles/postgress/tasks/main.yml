@@ -27,6 +27,7 @@
   ansible.builtin.shell:
     cmd: psql -lqt | grep -qw '{{ database_name }}' | grep 'does not exist'
   register: db_exists
+  ignore_errors: yes
 
 - name: what is there in db_exists
   debug: 
@@ -35,6 +36,8 @@
 - name: Display database creation status
   debug:
     msg: "{{ 'Database created' if db_exists.changed else 'Database already exists' }}"
+
+- meta: end_play
 
 - name: BLOCK create peer database
   when: db_exists is not defined
