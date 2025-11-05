@@ -33,12 +33,6 @@
   debug: 
     msg: "db_exists {{ db_exists.stderr }}"
 
-- name: Display database creation status
-  debug:
-    msg: "{{ 'Database created' if db_exists.changed else 'Database already exists' }}"
-
-- meta: end_play
-
 - name: BLOCK create peer database
   when: db_exists.stdout is empty
   block:
@@ -129,7 +123,7 @@
 ### Import data for database
 ##   
 - name: BLOCK import data to database
-  when: db_exists is defined
+  when: db_exists.stderr is empty
   block:
     - name: Check if structure SQL file exists on remote host
       stat:
