@@ -25,7 +25,7 @@
   become: yes
   become_user: peer  # Connect as postgres superuser
   ansible.builtin.shell:
-    cmd: psql -lqt | grep -qw '{{ database_name }}' | grep 'does not exist'"
+    cmd: psql -lqt | grep -qw '{{ database_name }}' | grep 'does not exist'
   register: db_exists
 
 - name: what is there in db_exists
