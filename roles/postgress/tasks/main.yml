@@ -31,7 +31,7 @@
 
 - name: what is there in db_exists
   debug: 
-    msg: "db_exists {{ db_exists }}"
+    msg: "db_exists {{ db_exists.stderr }}"
 
 - name: Display database creation status
   debug:
@@ -40,7 +40,7 @@
 - meta: end_play
 
 - name: BLOCK create peer database
-  when: db_exists is not defined
+  when: db_exists.stdout is empty
   block:
     - name: Read password from file if it exists
       slurp:
