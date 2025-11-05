@@ -13,13 +13,11 @@
 
   vars:
     database_name: "peer"
-    database_user: "peer_prod" 
-    path_to_file_on_host: '/etc/postgres-common/passcode'
-    # You can override these in your inventory
-    # Internal_Database: "192.168.1.210"   # Database server IP
-    # Bastion_IP: "192.168.1.10"           # Bastion server
-    # Internal_Backend: "192.168.1.200"    # Backend server IP
-    # External_IP_target: "162.19.169.215" # Host IP
+    # database_master_user: 
+    # database_modify_user:
+    database_unlock_key: '/home/peer/ansible/.passcode'
+    # database_credintials: 
+
     psql_port: 5432
     php_max_execution_time: "3600"
 
@@ -35,13 +33,13 @@
 
   - name: Check for peer-prod-database
     ansible.builtin.stat:
-      path: /home/peer/ansible/host_vars/peer-prod-database.yml
+      path: "{{ database_credintials }}"
     register: peer_prod_db_stat
     delegate_to: 127.0.0.1
 
   - name: Check for '.passcode'
     ansible.builtin.stat:
-      path: /home/peer/ansible/.passcode
+      path: "{{ database_unlock_key }}"
     register: peer_prod_pass_stat
     delegate_to: 127.0.0.1
 
