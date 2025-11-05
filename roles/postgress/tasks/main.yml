@@ -24,19 +24,20 @@
 - name: Check if database 'peer' exists before install or update 
   become: yes
   become_user: peer  # Connect as postgres superuser
-  postgresql_db:
-    name: "{{ database_name }}"
-    state: present
-    login_unix_socket: /var/run/postgresql
-  register: db_created
+  ansible.builtin.shell:
+    cmd: psql -lqt | grep -qw '{{ database_name }}' | grep 'does not exist'"
+  register: db_exists
 
+- name: what is there in db_exists
+  debug: 
+    msg: "db_exists {{ db_exists }}"
 
 - name: Display database creation status
   debug:
-    msg: "{{ 'Database created' if db_created.changed else 'Database already exists' }}"
+    msg: "{{ 'Database created' if db_exists.changed else 'Database already exists' }}"
 
 - name: BLOCK create peer database
-  when: db_created is not defined
+  when: db_exists is not defined
   block:
     - name: Read password from file if it exists
       slurp:
@@ -125,7 +126,7 @@
 ### Import data for database
 ##   
 - name: BLOCK import data to database
-  when: db_created is defined
+  when: db_exists is defined
   block:
     - name: Check if structure SQL file exists on remote host
       stat:
@@ -180,12 +181,12 @@
   postgresql_db:
     name: "{{ database_name }}"
     state: present
-  register: db_created
+  register: db_exists
 
 
 - name: Display database creation status
   debug:
-    msg: "{{ 'Database peer created' if db_created.changed else 'Database peer already exists' }}"
+    msg: "{{ 'Database peer created' if db_exists.changed else 'Database peer already exists' }}"
 
 - name: Check if SQL structure file exists
   stat:
