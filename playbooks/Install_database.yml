@@ -13,12 +13,18 @@
 
   vars:
     database_name: "peer"
-    # database_master_user: 
-    # database_modify_user:
+    database_user: "peer_beta"
     database_unlock_key: '/home/peer/ansible/.passcode'
-    # database_credintials: 
 
+    # Network configuration
+
+    ### need to untangle these values from database to only (Postgres database)
+    Internal_Database: "192.168.1.210"
+    Internal_Backend: "192.168.1.200"
     psql_port: 5432
+
+    # Firewall configuration
+    configure_firewall: true
     php_max_execution_time: "3600"
 
     # Database configuration

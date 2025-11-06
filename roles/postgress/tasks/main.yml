@@ -1,7 +1,7 @@
 # ==================================================
 # FILE: roles/postgress/tasks/main.yml
 #
-# For badatabase install
+# For daaatabase install
 # ==================================================
 ---
 - name: Update apt cache
@@ -20,39 +20,42 @@
     # - pipx
   # notify: Restart postgress
     
+  # postgres password {{ prod_root }}
+
+
 
 - name: Check if database 'peer' exists before install or update 
   become: yes
-  become_user: peer  # Connect as postgres superuser
+  become_user: postgres  # Connect as postgres superuser
   ansible.builtin.shell:
     cmd: psql -lqt | grep -qw '{{ database_name }}' | grep 'does not exist'
   register: db_exists
   ignore_errors: yes
 
-- name: what is there in db_exists
+- name: What is db_exists
   debug: 
     msg: "db_exists {{ db_exists.stderr }}"
 
+
+  ### Database is not created need to set up
+  ##  Assume psql is running
 - name: BLOCK create peer database
   when: db_exists.stdout is empty
   block:
-    - name: Read password from file if it exists
-      slurp:
-        path: "{{ path_to_file_on_host }}"
-      register: password_file_content
-      when: path_to_file_on_host is defined
-      ignore_errors: yes
 
-    - name: Set password from file or use default
-      set_fact:
-        actual_password: "{{ password_file_content['content'] | b64decode | trim if password_file_content is success else database_password }}"
+    
+    ### Configure role for postgres
+    - name: Run backup role after DB setup
+      import_role:
+        name: backup
 
+    ### set peer
     - name: Create PostgreSQL user
       become: yes
       become_user: peer
       postgresql_user:
         name: "{{ database_user }}"
-        password: "{{ actual_password }}"
+        password: "{{ staging_root }}"
         state: present
         login_unix_socket: /var/run/postgresql
       no_log: true  # Don't log password
@@ -118,8 +121,9 @@
           host    {{ database_name }}    {{ database_user }}    192.168.1.0/24         md5
         backup: yes
       notify: Restart PostgreSQL
+  ## End of block
 
-
+### Database is there and waiting for more data
 ### Import data for database
 ##   
 - name: BLOCK import data to database
@@ -170,17 +174,8 @@
       when:
         - optional_import is defined
         - optional_import.changed
-
-
-- name: Check if database 'peer' exists
-  become: yes
-  become_user: peer
-  postgresql_db:
-    name: "{{ database_name }}"
-    state: present
-  register: db_exists
-
-
+  ## End of block
+  
 - name: Display database creation status
   debug:
     msg: "{{ 'Database peer created' if db_exists.changed else 'Database peer already exists' }}"
