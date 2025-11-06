@@ -1,2 +1,3 @@
 .vscode/settings.json
+.gitleaks_out/
 .passcode.yml
