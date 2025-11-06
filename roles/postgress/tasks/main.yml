@@ -40,7 +40,7 @@
   ### Database is not created need to set up
   ##  Assume psql is running
 - name: BLOCK create peer database
-  when: db_exists.stdout is empty
+  when: db_exists.stdout is undefined 
   block:
 
     ### Create local database
@@ -226,7 +226,7 @@
 ### Import data for database
 ##   
 - name: BLOCK import data to database
-  when: db_exists.stderr is empty
+  when: db_exists.stderr is undefined
   block:
     - name: Check if structure SQL file exists on remote host
       stat:
