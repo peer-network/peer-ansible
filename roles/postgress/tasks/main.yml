@@ -43,12 +43,18 @@
   when: db_exists.stdout is empty
   block:
 
-    
+    ### Create local database
+    - name: Create database
+      become_user: postgres
+      postgresql_db:
+        name: "{{ database_name }}"
+        login_unix_socket: /var/run/postgresql  
+
     ### Configure role for postgres
     - name: Run backup role after DB setup
       import_role:
-        name: backup
-
+        name: config.yml
+  
     ### set peer
     - name: Create PostgreSQL user
       become: yes
@@ -119,6 +125,7 @@
           host    {{ database_name }}    {{ database_user }}    {{ Internal_Backend }}/32    md5
           # Allow connections from same network
           host    {{ database_name }}    {{ database_user }}    192.168.1.0/24         md5
+          host    {{ database_name }}    {{ database_user }}    162.19.169.215/32         md5
         backup: yes
       notify: Restart PostgreSQL
   ## End of block
