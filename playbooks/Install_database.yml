@@ -13,7 +13,7 @@
 
   vars:
     database_name: "peer"
-    database_user: "peer_beta"
+    database_user: "peer"
     database_unlock_key: '/home/peer/ansible/.passcode'
 
     # Network configuration
