@@ -24,21 +24,20 @@
 
 
 
-- name: Check if database 'peer' exists before install or update 
+- name: Check if database '{{ database_name }}' exists
   become: yes
-  become_user: postgres  # Connect as postgres superuser
+  become_user: postgres
   ansible.builtin.shell:
-    cmd: psql -lqt | grep -qw '{{ database_name }}' | grep 'does not exist'
+    cmd: psql -lqt | cut -d '|' -f 1 | grep -qw '{{ database_name }}'
   register: db_exists
   ignore_errors: yes
 
-- name: What is db_exists
-  debug: 
-    msg: 
-      - "db_exists error {{ db_exists.stderr }}"
-      - "db_exists output {{ db_exists.stdout }}"
-      - "db_exists error_lines {{ db_exists.stderr_lines }}"
-      - "db_exists output_lines {{ db_exists.stdout_lines }}"
+
+- name: Show database existence
+  debug:
+    msg: >
+      Database {{ database_name }} {{'exists' if db_exists.rc == 0 else 'does not exist'}}.
+  meta: end_play
 
   ### Database is not created need to set up
   ##  Assume psql is running
