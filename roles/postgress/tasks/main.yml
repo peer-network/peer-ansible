@@ -175,9 +175,9 @@
         password: "{{ staging_root }}"
         state: present
         login_unix_socket: /var/run/postgresql
-      no_log: true  # Don't log password
+      no_log: false  # Don't log password
 
-    - name: GUSER rant table permissions to user
+    - name: USER grant table permissions to user
       become: yes
       become_user: peer
       postgresql_privs:
