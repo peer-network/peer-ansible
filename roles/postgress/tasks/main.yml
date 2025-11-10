@@ -34,8 +34,11 @@
 
 - name: What is db_exists
   debug: 
-    msg: "db_exists {{ db_exists.stderr }}"
-
+    msg: 
+      - "db_exists error {{ db_exists.stderr }}"
+      - "db_exists output {{ db_exists.stdout }}"
+      - "db_exists error_lines {{ db_exists.stderr_lines }}"
+      - "db_exists output_lines {{ db_exists.stdout_lines }}"
 
   ### Database is not created need to set up
   ##  Assume psql is running
