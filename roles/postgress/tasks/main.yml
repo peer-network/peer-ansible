@@ -26,7 +26,7 @@
   become: yes
   become_user: postgres
   ansible.builtin.shell:
-    cmd: psql -lqt | cut -d '|' -f 1 | grep -qw "{{ database_name }}""
+    cmd: psql -lqt | cut -d '|' -f 1 | grep -qw "{{ database_name }}"
   register: db_exists
   ignore_errors: yes
 
