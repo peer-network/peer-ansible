@@ -52,6 +52,22 @@
         name: "{{ database_name }}"
         login_unix_socket: /var/run/postgresql  
 
+    - name: Ping PostgreSQL
+      become_user: postgres
+      postgresql_ping:
+        db: "{{ database_name }}"
+        login_unix_socket: "/var/run/postgresql"
+        login_user: postgres
+      register: db_status
+
+    - name: Show database existence
+      debug:
+        msg: "Database {{ database_name }} Status: {{ db_status }}"
+
+    - name: Diag end-play
+      ansible.builtin.meta: end_play
+
+
     ### Configure the database
     ###
     ## Find version of postgres to setup paths
