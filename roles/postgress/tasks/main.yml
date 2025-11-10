@@ -169,7 +169,7 @@
     ## 
     - name: USER Create PostgreSQL user
       become: yes
-      become_user: peer
+      become_user: "{{database_master_user}}"
       postgresql_user:
         name: "{{ database_user }}"
         password: "{{ staging_root }}"
@@ -179,7 +179,7 @@
 
     - name: USER grant table permissions to user
       become: yes
-      become_user: peer
+      become_user: "{{database_master_user}}"
       postgresql_privs:
         database: "{{ database_name }}"
         state: present
@@ -192,7 +192,7 @@
 
     - name: USER Grant default table privileges for new tables
       become: yes
-      become_user: peer
+      become_user: "{{database_master_user}}"
       postgresql_query:
         db: "{{ database_name }}"
         query: "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO {{ database_user }};"
@@ -200,7 +200,7 @@
 
     - name: USER Grant sequence permissions to user
       become: yes
-      become_user: peer
+      become_user: "{{database_master_user}}"
       postgresql_privs:
         database: "{{ database_name }}"
         state: present
@@ -213,7 +213,7 @@
 
     - name: USER Grant default sequence privileges for new sequences
       become: yes
-      become_user: peer
+      become_user: "{{database_master_user}}"
       postgresql_query:
         db: "{{ database_name }}"
         query: "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO {{ database_user }};"
@@ -255,7 +255,7 @@
 
     - name: Import structure into PostgreSQL
       become: yes
-      become_user: peer
+      become_user: "{{ database_modify_user }}"
       shell: |
         psql -d {{ database_name }} -f {{ sql_structure_file }}
       when:
@@ -278,7 +278,7 @@
 
     - name: Import optional data into PostgreSQL
       become: yes
-      become_user: peer
+      become_user: "{{database_modify_user}}"
       shell: |
         psql -d {{ database_name }} -f {{ sql_optional_data_file }}
       when:
@@ -306,7 +306,7 @@
 
 - name: Import structure into PostgreSQL database
   become: yes
-  become_user: peer
+  become_user: "{{database_modify_user}}"
   postgresql_query:
     db: peer
     path_to_script: "{{ sql_structure_file }}"
@@ -330,7 +330,7 @@
 
 - name: Import optional data into PostgreSQL database
   become: yes
-  become_user: peer
+  become_user: "{{database_modify_user}}"
   postgresql_query:
     db: peer
     path_to_script: "{{ sql_optional_data_file }}"
@@ -348,7 +348,7 @@
 
 - name: Create PostgreSQL user 'peer_beta'
   become: yes
-  become_user: peer
+  become_user: "{{database_master_user}}"
   postgresql_user:
     name: peer_beta
     password: "{{ postgres_peer_beta_password }}"
@@ -357,7 +357,7 @@
 
 - name: Grant table permissions to peer_beta on existing tables
   become: yes
-  become_user: peer
+  become_user: "{{database_master_user}}"
   postgresql_privs:
     database: peer
     state: present
@@ -369,14 +369,14 @@
 
 - name: Grant default table permissions for new tables
   become: yes
-  become_user: peer
+  become_user: "{{database_master_user}}"
   postgresql_query:
     db: peer
     query: "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO peer_beta;"
 
 - name: Grant sequence permissions to peer_beta on existing sequences
   become: yes
-  become_user: peer
+  become_user: "{{database_master_user}}"
   postgresql_privs:
     database: peer
     state: present
@@ -388,7 +388,7 @@
 
 - name: Grant default sequence permissions for new sequences
   become: yes
-  become_user: peer
+  become_user: "{{database_master_user}}"
   postgresql_query:
     db: peer
     query: "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO peer_beta;"
