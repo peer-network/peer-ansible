@@ -26,14 +26,13 @@
   become: yes
   become_user: postgres
   ansible.builtin.shell:
-    cmd: psql -lqt | cut -d '|' -f 1 | grep -qw '{{ database_name }}'
+    cmd: psql -lqt | cut -d '|' -f 1 | grep -qw "{{ database_name }}""
   register: db_exists
   ignore_errors: yes
 
 - name: Show database existence
   debug:
-    msg: 
-      - "Database {{ database_name }} {{'exists' if db_exists.rc == 0 else 'does not exist'}}."
+    msg: "Database {{ database_name }} {{'exists' if db_exists.rc == 0 else 'does not exist'}}."
   meta: end_play
 
   ### Database is not created need to set up
