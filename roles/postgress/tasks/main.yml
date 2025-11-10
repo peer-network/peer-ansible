@@ -35,8 +35,7 @@
 
 - name: Show database existence
   debug:
-    msg: >
-      Database {{ database_name }} {{'exists' if db_exists.rc == 0 else 'does not exist'}}.
+    msg: Database {{ database_name }} {{'exists' if db_exists.rc == 0 else 'does not exist'}}.
   meta: end_play
 
   ### Database is not created need to set up
