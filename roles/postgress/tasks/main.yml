@@ -33,12 +33,16 @@
 - name: Show database existence
   debug:
     msg: "Database {{ database_name }} {{'exists' if db_exists.rc == 0 else 'does not exist'}}. {{ db_exists }}"
-- ansible.builtin.meta: end_play
 
-  ### Database is not created need to set up
+- name: Bad Database error on check, end play?
+  ansible.builtin.meta: end_play
+  when: db_exists.rc > 1  # stop for any non [0,1] database check errors 
+
+  ### Database is not defined, need to create it. -------------------
+  ##  The database needs to be created 
   ##  Assume psql is running
 - name: BLOCK create peer database
-  when: db_exists.stdout is undefined 
+  when: db_exists.rc != 0  # An error in database check, 
   block:
 
     ### Create local database
@@ -220,11 +224,11 @@
     #   notify: Restart PostgreSQL
   ## End of block
 
-### Database is there and waiting for more data
+### Database is there and can recive more data
 ### Import data for database
 ##   
 - name: BLOCK import data to database
-  when: db_exists.stderr is undefined
+  when: db_exists.rc == 0  # No error in database check
   block:
     - name: Check if structure SQL file exists on remote host
       stat:
