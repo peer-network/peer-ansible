@@ -118,30 +118,38 @@
         remote_src: yes
         force: no
 
-    - name: CONFIG Configure pg_hba.conf for authentication
+    - name: CONFIG Configure pg_hba.conf for authentication to "{{ pg_hba }}"
       blockinfile:
         path: "{{ pg_hba }}"
         marker: "# {mark} ANSIBLE MANAGED AUTHENTICATION"
-        insertafter: "^# TYPE"
+        insertbefore: "^# \"local\" is for Unix domain socket"
         block: |
           # Local socket connections
-          local   all             postgres                                peer
+          # postgres user with password (local)
+          local   all             {{ database_master_user }}              md5
           local   all             all                                     md5
           
-          # IPv4 local connections
+          # IP local connections
           host    all             all             127.0.0.1/32            md5
           host    all             all             ::1/128                 md5
           
+          # Master user (postgres) from backend server
+          host    all             {{ database_master_user }}        {{ Internal_Backend }}/32        md5
+          host    all             {{ database_modify_user }}        {{ Internal_Backend }}/32        md5
+
           # Backend server access
-          host    {{ database_name }}    {{ database_user }}       {{ Internal_Backend }}/32    md5
+          host    {{ database_name }}    {{ database_modify_user }}       {{ Internal_Backend }}/32    md5
           
           # Local network access (192.168.1.0/24)
-          host    {{ database_name }}    {{ database_user }}       192.168.1.0/24               md5
+          host    {{ database_name }}    {{ database_modify_user }}       192.168.1.0/24               md5
           
           # Master user access from backend
-          host    all             postgres                         {{ Internal_Backend }}/32    md5
-          host    all             postgres                         192.168.1.0/24               md5
+          host    all             {{ database_master_user }}       {{ Internal_Backend }}/32    md5
+          host    all             {{ database_modify_user }}       192.168.1.0/24               md5
       notify: Reload PostgreSQL
+      backup: yes
+          # local   all             {{ database_modify_user }}              md5
+
 
     - name: CONFIG Flush handlers to reload PostgreSQL config
       meta: flush_handlers
