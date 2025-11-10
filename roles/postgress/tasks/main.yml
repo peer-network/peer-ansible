@@ -118,7 +118,7 @@
         remote_src: yes
         force: no
 
-    - name: CONFIG Configure pg_hba.conf for authentication to {{ pg_hba }}
+    - name: "CONFIG Configure pg_hba.conf for authentication to {{ pg_hba }}"
       blockinfile:
         path: "{{ pg_hba }}"
         marker: "# {mark} ANSIBLE MANAGED AUTHENTICATION"
