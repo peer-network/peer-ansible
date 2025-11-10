@@ -64,9 +64,6 @@
       debug:
         msg: "Database {{ database_name }} Status: {{ db_status }}"
 
-    - name: Diag end-play
-      ansible.builtin.meta: end_play
-
 
     ### Configure the database
     ###
@@ -163,6 +160,10 @@
         role_attr_flags: SUPERUSER,CREATEDB,CREATEROLE,REPLICATION
         login_unix_socket: /var/run/postgresql
       no_log: true  
+
+    - name: Diag end-play
+      ansible.builtin.meta: end_play
+
 
     ### USER set peer -----
     ## 
