@@ -45,6 +45,7 @@
     path: /etc/php/8.3/fpm/php.ini
     append_newline: true
     prepend_newline: true
+    marker: "; {mark} ANSIBLE MANAGED BLOCK" 
     block: |
       zend_extension=opcache
       opcache.enable=1
