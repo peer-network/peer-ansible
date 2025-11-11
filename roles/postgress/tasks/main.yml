@@ -148,7 +148,7 @@
           host    all             {{ database_modify_user }}       192.168.1.0/24               md5
 
           # Master user access from backend
-          host    all             {{ database_master_user }}       {{ Internal_Bation }}/32    md5          
+          host    all             {{ database_master_user }}       {{ Internal_Bastion }}/32    md5          
         backup: yes
       notify: Reload PostgreSQL
 
