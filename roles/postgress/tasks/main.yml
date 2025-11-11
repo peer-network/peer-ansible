@@ -401,7 +401,7 @@
       - "  - Grants configured for tables and sequences"
       - ""
       - "Connection details:"
-      - "  Host: {{ Internal_IP_target }}"
+      - "  Host: {{ Internal_Database }}"
       - "  Port: {{ psql_port }}"
       - "  Database: peer"
       - "  User: peer_beta"
