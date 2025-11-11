@@ -55,7 +55,18 @@
       ; Enable JIT Compilation (PHP 8+)
       opcache.jit=1255
       opcache.jit_buffer_size=128M
-    notify: Restart PHP-FPM
+
+- name: set files for PHP restart
+  debug: 
+    msg:
+    - "completed update for:"
+    - "/etc/php/8.3/fpm/pool.d/www.conf"
+    - "/etc/php/8.3/mods-available/opcache.ini"
+    - "/etc/php/8.3/fpm/php.ini"
+    - "Restarting PHP-FPM"
+  changed_when: true
+  when: something is changed
+  notify: Restart PHP-FPM
 
 
 
