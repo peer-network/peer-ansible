@@ -9,6 +9,7 @@
     path: /etc/php/8.3/fpm/pool.d/www.conf
     append_newline: true
     prepend_newline: true
+    marker: "; {mark} ANSIBLE MANAGED BLOCK" 
     block: |
       pm = dynamic
       pm.max_children = 300
