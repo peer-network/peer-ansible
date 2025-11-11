@@ -42,7 +42,7 @@
 ##  Last file, restart php
 - name: Edit php-ini file
   ansible.builtin.blockinfile:
-    path: etc/php/8.3/fpm/php.ini
+    path: /etc/php/8.3/fpm/php.ini
     append_newline: true
     prepend_newline: true
     block: |
