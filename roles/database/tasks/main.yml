@@ -65,7 +65,6 @@
     - "/etc/php/8.3/fpm/php.ini"
     - "Restarting PHP-FPM"
   changed_when: true
-  when: something is changed
   notify: Restart PHP-FPM
 
 
