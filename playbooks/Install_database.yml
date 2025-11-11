@@ -31,7 +31,7 @@
 
     psql_port: 5432
 
-    postgres_peer_beta_password: "{{ prod peer_beta }}"
+    postgres_peer_beta_password: "{{ prod_peer_beta }}"
 
     # Firewall configuration
     configure_firewall: true
