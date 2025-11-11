@@ -238,20 +238,7 @@
         line: "listen_addresses = '{{ Internal_Database }}'"
         backup: yes
       notify: Restart PostgreSQL
-
-    # - name: Configure pg_hba.conf for network access
-    #   blockinfile:
-    #     path: /etc/postgresql/*/main/pg_hba.conf
-    #     marker: "# {mark} ANSIBLE MANAGED - Backend Access"
-    #     block: |
-    #       # Allow backend server to connect
-    #       host    {{ database_name }}    {{ database_user }}    {{ Internal_Backend }}/32    md5
-    #       # Allow connections from same network
-    #       host    {{ database_name }}    {{ database_user }}    192.168.1.0/24         md5
-    #       host    {{ database_name }}    {{ database_user }}    162.19.169.215/32         md5
-    #     backup: yes
-    #   notify: Restart PostgreSQL
-  ## End of block
+## End of block
 
 ### Database is there and can recive more data
 ### Import data for database
@@ -360,7 +347,7 @@
 
 - name: Create PostgreSQL user 'peer_beta'
   become: yes
-  become_user: "{{database_master_user}}"
+  become_user: "{{ database_master_user }}"
   postgresql_user:
     name: peer_beta
     password: "{{ postgres_peer_beta_password }}"
@@ -369,7 +356,7 @@
 
 - name: Grant table permissions to peer_beta on existing tables
   become: yes
-  become_user: "{{database_master_user}}"
+  become_user: "{{ database_master_user }}"
   postgresql_privs:
     database: peer
     state: present

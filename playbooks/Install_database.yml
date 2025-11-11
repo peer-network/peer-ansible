@@ -31,6 +31,8 @@
 
     psql_port: 5432
 
+    postgres_peer_beta_password: "{{ prod peer_beta }}"
+
     # Firewall configuration
     configure_firewall: true
     php_max_execution_time: "3600"
