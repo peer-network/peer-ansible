@@ -80,27 +80,22 @@
       loop_control:
         loop_var: i
 
-    - name: Build VM ID mapping safely
+    - name: Set target VM from extra vars or default to all
       set_fact:
-        inventory_vm_ids: "{{ inventory_vm_ids | default({}) | combine({item: hostvars[item].vm_id}) }}"
-      loop: "{{ groups['production'] | select('in', vms_to_process) | list }}"
-      when: hostvars[item].vm_id is defined
-      loop_control:
-        label: "{{ item }}"
+        target_vm_name: "{{ target_vm | default('') }}"
+    
+    - name: Determine VMs to process
+      set_fact:
+        vms_to_process: "{{ (target_vm_name != '') | ternary([target_vm_name], proxmox_firewall_rules.keys() | list) }}"
+    
 
-    # - name: Load inventory and build VM ID mapping
-    #   set_fact:
-    #     inventory_vm_ids: "{{ inventory_vm_ids | default({}) | combine({item.key: item.value.vm_id}) }}"
-    #   loop: "{{ hostvars | dict2items }}"
-    #   when: 
-    #     - item.value.vm_id is defined
-    #     - item.key in vms_to_process
-    #   loop_control:
-    #     label: "{{ item.key }}"
     
     - name: Show final VM ID mapping
       debug:
-        var: inventory_vm_ids
+        var: 
+          - inventory_vm_name 
+          - vms_to_process
+
 
     - name: Display discovered VM IDs from inventory
       debug:
