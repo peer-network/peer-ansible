@@ -71,7 +71,7 @@
     - name: Print host and IP from inventory
       debug:
         msg: "{{ item }} => {{ hostvars[item].ansible_host }}"
-      loop: "{{ groups['web_servers'] }}"
+      loop: "{{ groups['Production'] }}"
 
 
     - name: Load inventory and build VM ID mapping
