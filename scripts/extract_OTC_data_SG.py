@@ -313,9 +313,10 @@ def main():
     print("INVENTORY-AWARE SECURITY GROUP EXTRACTOR")
     print("=" * 80 + "\n")
     
-    # Input files
-    peer_groups_file = '/mnt/user-data/uploads/peer_groups.yml'
-    inventory_file = '/mnt/user-data/uploads/inventory.yml'
+    # Input filesfind 
+    peer_groups_file = '/home/peer/ansible/group_vars/peer_groups.yml'
+
+    inventory_file = '/home/peer/ansible/inventory/inventory.yml'
     
     # Check files exist
     if not Path(peer_groups_file).exists():
