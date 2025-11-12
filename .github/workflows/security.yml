@@ -14,3 +14,92 @@ jobs:
     uses: peer-network/peer_global_security/.github/workflows/gitleaks.yml@main
     with:
       config: gitleaks.toml
+
+  trivy_scan:
+    name: Run Trivy Security Scan
+    needs: [gitleaks]
+    uses: peer-network/.github/.github/workflows/trivy-scan.yml@main
+    with:
+      scan_target: .
+
+  map_pr_to_discord:
+    name: Map PR to Discord User
+    runs-on: ubuntu-latest
+    outputs:
+      discord_mention: ${{ steps.map.outputs.discord_mention }}
+    steps:
+      - id: map
+        run: |
+          case "${{ github.event.pull_request.user.login }}" in
+            WisdomNwaiwu)
+              echo "discord_mention=<@1362087975906967736>" >> $GITHUB_OUTPUT
+              ;;
+            jakobPeer)
+              echo "discord_mention=<@1334087880833892392>" >> $GITHUB_OUTPUT
+              ;;
+            gogeekness)
+              echo "discord_mention=<@298135800804278274>" >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "discord_mention=<@1362087975906967736>" >> $GITHUB_OUTPUT ;;
+          esac
+
+  send_discord_notification:
+    name: Unified Discord Notification
+    runs-on: ubuntu-latest
+    needs: [gitleaks, trivy_scan, map_pr_to_discord]
+    if: always()
+    steps:
+      - name: Decide Notification Type
+        id: decide
+        run: |
+          gitleaks_result="${{ needs.gitleaks.result }}"
+          trivy_findings="${{ needs.trivy_scan.outputs.has_findings }}"
+          type="none"
+          if [ "$gitleaks_result" == "failure" ]; then
+            type="gitleaks_failed"
+          elif [ "$trivy_findings" == "true" ]; then
+            type="trivy_vulnerabilities"
+          fi
+          echo "type=$type" >> $GITHUB_OUTPUT
+
+      - name: Send Discord Notification
+        if: steps.decide.outputs.type != 'none'
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_MENTION: ${{ needs.map_pr_to_discord.outputs.discord_mention }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          case "${{ steps.decide.outputs.type }}" in
+            gitleaks_failed)
+              MESSAGE=":x: **Peer Ansible Gitleaks Scan Failed!**\n"
+              MESSAGE+="**PR:** $PR_TITLE\n"
+              MESSAGE+="PR Link: <$PR_URL>\n"
+              MESSAGE+="CI Run: <$RUN_URL>\n"
+              MESSAGE+="Author: $DISCORD_MENTION\n\n"
+              MESSAGE+=":warning: **Secrets were detected by Gitleaks**\n"
+              MESSAGE+="You can:\n"
+              MESSAGE+="- [Click here to view workflow artifacts](<$RUN_URL>) (download the **gitleaks-report** artifact)\n"
+              MESSAGE+="- Check the **Actions → Artifacts** tab to view/download the report\n"
+              MESSAGE+=":no_entry: **Reminder:** Do NOT bypass with \`git commit --no-verify\`. CI will still block your PR.\n"
+              MESSAGE+="If this secret is actually required in the repo (false positive or approved usage),\n"
+              MESSAGE+="you MUST meet with the **CTO / Team Lead / DevOps** to approve and add it to the gitleaks ignore list."
+              ;;
+            trivy_vulnerabilities)
+              MESSAGE="**Trivy found HIGH or CRITICAL vulnerabilities in Peer Ansible!**\n"
+              MESSAGE+="**Do NOT ignore this finding — inform your Team Lead or CTO immediately.**\n"
+              MESSAGE+="View the **Trivy report artifact** in the Actions run for full details.\n"
+              MESSAGE+="**PR:** $PR_TITLE\n"
+              MESSAGE+="Link: <$PR_URL>\n"
+              MESSAGE+="Run: <$RUN_URL>\n"
+              MESSAGE+="Author: $DISCORD_MENTION\n\n"
+              MESSAGE+="<@298135800804278274> <@1362087975906967736> <@1334087880833892392>"
+              ;;
+          esac
+
+          curl -H "Content-Type: application/json" \
+               -X POST \
+               -d "{\"content\": \"$MESSAGE\"}" \
+               "$DISCORD_WEBHOOK_URL"
