@@ -67,14 +67,15 @@
   pre_tasks:
     # ========================================================================
     # BUILD VM ID MAPPING FROM INVENTORY
-    # ========================================================================
+    # =====
+    # ===================================================================
+
     - name: Print host and IP from inventory
       debug:
         msg: 
-          - "Debug INV name {{ item }} => {{ hostvars[item].ansible_host }}"
+          #- "Debug INV name {{ item }} => {{ hostvars[item].ansible_host }}"
           - "Debug INV item {{ inventory_vm_ids | default({}) | combine({item.key: item.value.vm_id}) }}"
       loop: "{{ groups['production'] }}"
-
 
 
     - name: Load inventory and build VM ID mapping
