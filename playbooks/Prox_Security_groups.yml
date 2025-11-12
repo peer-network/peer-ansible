@@ -70,7 +70,9 @@
     # ========================================================================
     - name: Print host and IP from inventory
       debug:
-        msg: "{{ item }} => {{ hostvars[item].ansible_host }}"
+        msg: 
+          - "Debug : {{ item }} => {{ hostvars[item].ansible_host }}"
+          - "Debug : {{ inventory_vm_ids | default({}) | combine({item.key: item.value.vm_id}) }}"
       loop: "{{ groups['production'] }}"
 
 
