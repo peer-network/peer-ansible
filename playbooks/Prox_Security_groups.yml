@@ -68,7 +68,12 @@
     # ========================================================================
     # BUILD VM ID MAPPING FROM INVENTORY
     # ========================================================================
-    
+    - name: Print host and IP from inventory
+      debug:
+        msg: "{{ item }} => {{ hostvars[item].ansible_host }}"
+      loop: "{{ groups['web_servers'] }}"
+
+
     - name: Load inventory and build VM ID mapping
       set_fact:
         inventory_vm_ids: "{{ inventory_vm_ids | default({}) | combine({item.key: item.value.vm_id}) }}"
