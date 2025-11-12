@@ -70,12 +70,15 @@
     # =====
     # ===================================================================
 
-    - name: Print host and IP from inventory
+    - name: Debug each production host
       debug:
-        msg: 
-          - "Debug INV name {{ item }} => {{ hostvars[item].ansible_host }}"
-          - "Debug INV item {{ inventory_vm_ids | default({}) | combine({item.key: item.value.vm_id}) }}"
-      with_items: "{{ groups['production'] }}"
+        msg: |
+          Debug INV name: {{ i }}
+          ansible_host: {{ hostvars[i].ansible_host }}
+          vm_id: {{ hostvars[i].vm_id }}
+      loop: "{{ groups['production'] }}"
+      loop_control:
+        loop_var: i
 
 
     - name: Load inventory and build VM ID mapping
