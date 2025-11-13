@@ -28,8 +28,11 @@
 - name: Apply Firewall Rules to Proxmox VMs (Inventory-Aware)
   hosts: localhost
   gather_facts: no
+
   vars_files:
     - proxmox_firewall_rules.yml
+    - ../host_vars/proxmox_vault.yml
+
   
   vars:
     # ========================================================================

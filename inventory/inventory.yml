@@ -7,7 +7,8 @@ all:
     ansible_ssh_private_key_file: ~/.ssh/ovh-host
     ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
     ansible_python_interpreter: /usr/bin/python3
-  
+    proxmox_host: 162.19.169.215
+
   children:
     # Production environment
     production:
