@@ -33,6 +33,10 @@
     - proxmox_firewall_rules.yml
     - ../host_vars/proxmox_vault.yml
 
+  environment:
+    PROXMOX_HOST: "{{ proxmox_host }}"
+    PROXMOX_TOKEN: "{{ proxmox_token }}"
+    PROXMOX_NODE: "{{ proxmox_node }}"
   
   vars:
     # ========================================================================
@@ -72,6 +76,7 @@
     # BUILD VM ID MAPPING FROM INVENTORY
     # =====
     # ===================================================================
+      
 
     - name: Debug each production host
       debug:
@@ -91,14 +96,11 @@
       set_fact:
         vms_to_process: "{{ (target_vm_name != '') | ternary([target_vm_name], proxmox_firewall_rules.keys() | list) }}"
     
-
-    
     - name: Show final VM ID mapping
       debug:
         var: 
           - inventory_vm_name 
           - vms_to_process
-
 
     - name: Display discovered VM IDs from inventory
       debug:
@@ -161,6 +163,9 @@
     # STEP 1: Test API Connection
     # ========================================================================
     
+    - name: add proxmox token for API access
+
+
     - name: Test Proxmox API connection
       uri:
         url: "https://{{ proxmox_api_host }}:8006/api2/json/version"
