@@ -163,9 +163,6 @@
     # STEP 1: Test API Connection
     # ========================================================================
     
-    - name: add proxmox token for API access
-
-
     - name: Test Proxmox API connection
       uri:
         url: "https://{{ proxmox_api_host }}:8006/api2/json/version"
