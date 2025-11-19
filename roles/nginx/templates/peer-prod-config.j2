@@ -1,0 +1,133 @@
+map "$http_origin" $cors {
+  default '';
+  "~^https?://peernetwork.eu(:[0-9]+)?$" "$http_origin";
+  "~^https?://peer-network.eu(:[0-9]+)?$" "$http_origin";
+  "~^https?://peerapp.de(:[0-9]+)?$" "$http_origin";
+  "~^https?://frontend.getpeer.eu(:[0-9]+)?$" "$http_origin";
+}
+
+server {
+    listen 443 ssl;
+    server_name peernetwork.eu www.peernetwork.eu;
+    ssl_certificate /etc/letsencrypt/live/peernetwork.eu/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/peernetwork.eu/privkey.pem;
+
+	client_max_body_size 510M;
+	   
+    root /var/www/peer_beta/peer_backend;
+    index index.php index.html;
+
+    # GraphQL-specific route
+    location ~ ^/(graphql|upload-post)$ {
+        # Route requests to Slim app
+        try_files $uri /public/index.php?$query_string;
+
+        # Ensure JSON Content-Type for API responses
+        add_header 'Content-Type' 'application/json' always;
+        
+        # Handle preflight OPTIONS requests (CORS preflight)
+        if ($request_method = OPTIONS) {
+            add_header 'Access-Control-Allow-Origin' "$cors" always;
+            add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS' always;
+            add_header 'Access-Control-Allow-Headers' 'Authorization, Content-Type' always;
+            return 204;
+        }
+    }
+	
+    # PHP location block
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+		
+		fastcgi_buffers 16 16k;
+		fastcgi_buffer_size 32k;
+		fastcgi_busy_buffers_size 64k;
+		fastcgi_read_timeout 300;
+    }
+	
+    # Block everything else with proper 404 pages
+    location / {
+        return 404;
+    }
+	
+    # Prevent access to hidden files
+	location ~ /\. {
+        deny all;
+		return 404;
+    }
+	
+	# Security: Block access to all file extensions
+	location ~* \. {
+        deny all;
+        return 404;
+    }
+	
+	autoindex off;
+}
+
+server {
+    listen 443 ssl;
+    server_name media.peernetwork.eu;
+	
+	ssl_certificate /etc/letsencrypt/live/peernetwork.eu/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/peernetwork.eu/privkey.pem;
+
+	client_max_body_size 500M;
+	
+    root /var/www/peer_beta/peer_backend/runtime-data/media;
+	
+		    # Explicit Content-Type for .txt files ONLY in /text and /userData
+    location ~* ^/(text|userData)/.*\.txt$ {
+        add_header Content-Type "text/plain; charset=utf-8" always;
+        add_header Access-Control-Allow-Origin "$cors";
+        add_header Access-Control-Allow-Methods "GET";
+        add_header Access-Control-Allow-Headers "Content-Type, Authorization";
+    }
+	
+	  # Statische Dateien nur für Medien freigeben
+    location / {
+        try_files $uri /index.html;
+		
+		 # CORS-Header hinzufügen
+        add_header Access-Control-Allow-Origin "$cors";
+        add_header Access-Control-Allow-Methods "GET";
+        add_header Access-Control-Allow-Headers "Content-Type, Authorization";
+    }
+	
+    # Prevent access to hidden files
+	location ~ /\. {
+        deny all;
+		return 404;
+    }
+	
+	# Security: Block access to some dangerous file extensions
+	 location ~* \.(php|env|log|htaccess|htpasswd|ini|conf|sh|sql|key|yml|exe)$ {
+        deny all;
+        return 404;
+    }
+	
+	autoindex off;
+}
+
+server {
+    listen 80;
+    server_name media.peernetwork.eu peernetwork.eu www.peernetwork.eu;
+
+    # These will catch and block malicious requests before redirect
+    location ~ /\. {
+        deny all;
+        return 404;
+    }
+    
+    location ~* \.(php|env|log|htaccess|htpasswd|ini|conf|sh|sql|key|yml)$ {
+        deny all;
+        return 404;
+    }
+	
+    # Redirect all other HTTP requests to HTTPS
+    return 301 https://$host$request_uri;
+	
+	autoindex off;
+}
