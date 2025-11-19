@@ -1,0 +1,7 @@
+# FILE: roles/apache2/meta/main.yml
+# Apache2 role dependencies
+# ==================================================
+---
+dependencies:
+  - role: common
+  - role: www_permissions

@@ -33,16 +33,12 @@
     - proxmox_firewall_rules.yml
     - ../host_vars/proxmox_vault.yml
 
-  environment:
-    PROXMOX_HOST: "{{ proxmox_host }}"
-    PROXMOX_TOKEN: "{{ proxmox_token }}"
-    PROXMOX_NODE: "{{ proxmox_node }}"
-  
   vars:
     # ========================================================================
     # PROXMOX CONFIGURATION
     # ========================================================================
-    
+    proxmox_unlock_key: '/home/peer/ansible/.passcode'
+
     # API Configuration (use environment variables or Ansible Vault)
     proxmox_api_host: "{{ lookup('env', 'PROXMOX_HOST') | default('192.168.1.1', true) }}"
     proxmox_api_user: "{{ lookup('env', 'PROXMOX_USER') | default('root@pam', true) }}"
@@ -71,12 +67,22 @@
     # Filter VMs based on target
     vms_to_process: "{{ (target_vm != '') | ternary([target_vm], proxmox_firewall_rules.keys() | list) }}"
   
+
+  environment:
+    PROXMOX_HOST: "{{ proxmox_host }}"
+    PROXMOX_TOKEN: "{{ proxmox_token }}"
+    PROXMOX_NODE: "{{ proxmox_node }}"
+  
   pre_tasks:
     # ========================================================================
     # BUILD VM ID MAPPING FROM INVENTORY
     # =====
     # ===================================================================
-      
+    - name: Check for '.passcode'
+      ansible.builtin.stat:
+        path: "{{ database_unlock_key }}"
+      register: peer_prod_pass_stat
+      delegate_to: 127.0.0.1      
 
     - name: Debug each production host
       debug:
