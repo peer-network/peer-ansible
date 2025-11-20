@@ -1,0 +1,36 @@
+# ==================================================
+# FILE: playbooks/install_wwebsite.yml
+# Playbook to install website server
+# ==================================================
+---
+
+- name: Install Website Server
+  hosts: peer-prod-website
+  become: yes
+  
+  vars:
+    # Apache2 configs
+    # ansible_user: "{{ ansible_user | default('peer') }}"
+    
+  ### Thisis a role of roles, as 'backend' will call other roles  
+  roles:
+    - website 
+
+  post_tasks:
+    - name: Display completion message
+      debug:
+        msg:
+          - "=========================================="
+          - "Website installation complete!"
+          - "=========================================="
+          - "Services installed:"
+          - "  Apache 2"
+          - ""
+          - "Test your installation:"
+          - "  curl http://{{ ansible_host }}/<blank>"
+          - ""
+          - "Next steps:"
+          - "  1. Deploy your application to /var/www/html"
+          - "  2. Run composer install in your app directory"
+          - "  3. Configure your .env file"
+          - "=========================================="
