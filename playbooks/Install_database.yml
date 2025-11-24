@@ -38,7 +38,7 @@
     php_max_execution_time: "3600"
 
     # Database configuration
-    database_password: "change_me_in_vault"  # Override with vault
+    database_password: "{{ prod_root }}"
     # SQL files to import (update these paths!)
     sql_structure_file: "/home/peer/db_files/structure.sql"
     sql_optional_data_file: "/home/peer/db_files/optional_data.sql"
