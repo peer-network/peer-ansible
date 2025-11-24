@@ -15,6 +15,7 @@
     database_name: "peer"
     database_user: "peer"
     database_unlock_key: '/home/peer/ansible/.passcode'
+  
 
     # Network configuration
 
@@ -47,11 +48,12 @@
 ##  
   pre_tasks:
 
-  - name: Check for peer-prod-database
-    ansible.builtin.stat:
-      path: "{{ database_credintials }}"
-    register: peer_prod_db_stat
-    delegate_to: 127.0.0.1
+  ##  The vars are in the host-vault for the database
+  # - name: Check for peer-prod-database
+  #   ansible.builtin.stat:
+  #     path: "{{ database_credintials }}"
+  #   register: peer_prod_db_stat
+  #   delegate_to: 127.0.0.1
 
   - name: Check for '.passcode'
     ansible.builtin.stat:
