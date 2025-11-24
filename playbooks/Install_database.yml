@@ -33,6 +33,7 @@
     psql_port: 5432
 
     postgres_peer_beta_password: "{{ prod_peer_beta }}"
+    database_credintials: "/home/peer/peer-ansible/host_vars/peer-prod-database.yml"
 
     # Firewall configuration
     configure_firewall: true
@@ -48,12 +49,12 @@
 ##  
   pre_tasks:
 
-  ##  The vars are in the host-vault for the database
-  # - name: Check for peer-prod-database
-  #   ansible.builtin.stat:
-  #     path: "{{ database_credintials }}"
-  #   register: peer_prod_db_stat
-  #   delegate_to: 127.0.0.1
+  #  The vars are in the host-vault for the database
+  - name: Check for peer-prod-database
+    ansible.builtin.stat:
+      path: "{{ database_credintials }}"
+    register: peer_prod_db_stat
+    delegate_to: 127.0.0.1
 
   - name: Check for '.passcode'
     ansible.builtin.stat:

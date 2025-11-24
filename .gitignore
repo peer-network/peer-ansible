@@ -1,4 +1,4 @@
 .vscode/settings.json
-.passcode.yml
+.passcode*
 /home/peer/ansible/peer-ansible/host_vars/peer-prod-database.yml
 proxmox_vault.yml
