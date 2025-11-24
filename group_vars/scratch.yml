@@ -1,0 +1,417 @@
+---
+# Generated Proxmox Firewall Rules from Inventory
+# Source: peer_groups.yml + inventory.yml
+# Use with: ansible-playbook -i inventory.yml apply_proxmox_firewall_v3.yml
+
+proxmox_firewall_rules:
+  peer-prod-database:
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-rds-pg
+    proto: tcp
+    dport: '5432'
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-rds-pg
+    proto: tcp
+    dport: '5432'
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-MySQL-DB
+    proto: tcp
+    dport: '3306'
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-prod-pg
+    proto: tcp
+    dport: '5432'
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-prod-pg
+    proto: tcp
+    dport: '5432'
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-rds-pg-testing
+    proto: tcp
+    dport: '5432'
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-rds-pg-testing
+    proto: tcp
+    dport: '5432'
+  peer-prod-admin:
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From peer-admin-loki
+    proto: tcp
+    dport: '443'
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From peer-admin-loki
+    proto: icmp
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From peer-admin-loki
+    proto: tcp
+    dport: '80'
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From peer-admin-loki
+    proto: tcp
+    dport: '3389'
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From peer-admin-loki
+    proto: tcp
+    dport: '22'
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From peer-admin-loki
+    proto: tcp
+    dport: '3000'
+    source: 10.50.0.0/16
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From peer-admin-loki
+    proto: tcp
+    dport: '3100'
+    source: 10.50.0.0/16
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-admin-testing
+    proto: tcp
+    dport: '22'
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-admin-testing
+    proto: tcp
+    dport: '22'
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-admin
+    proto: tcp
+    dport: '22'
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-admin
+    proto: tcp
+    dport: '22'
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-prod-admin
+    proto: tcp
+    dport: '22'
+  peer-prod-frontend:
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-prod-web-frontend
+    proto: tcp
+    dport: '443'
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-prod-web-frontend
+    proto: tcp
+    dport: '80'
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-prod-web-frontend
+    proto: tcp
+    dport: '22'
+  peer-prod-bastion:
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-peer-jump-testing
+    proto: tcp
+    dport: '22'
+    source: 93.240.197.170/32
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-peer-jump-testing
+    proto: tcp
+    dport: '22'
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-peer-jump-testing
+    proto: tcp
+    dport: '5000'
+    source: 143.55.64.0/20
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-peer-jump-testing
+    proto: tcp
+    dport: '5000'
+    source: 140.82.112.0/20
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-peer-jump-testing
+    proto: tcp
+    dport: '5000'
+    source: 185.199.108.0/22
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-peer-jump-testing
+    proto: tcp
+    dport: '5000'
+    source: 192.30.252.0/22
+  - type: OUT
+    action: ACCEPT
+    enable: 1
+    comment: From sg-peer-jump-testing
+    proto: tcp
+    dport: '5000'
+    dest: 164.30.10.149/32
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-prod-jump
+    proto: tcp
+    dport: '22'
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From peer-admin-jump
+    proto: tcp
+    dport: '22'
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From peer-admin-jump
+    proto: tcp
+    dport: '3389'
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From peer-admin-jump
+    proto: icmp
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From peer-admin-jump
+    proto: tcp
+    dport: '80'
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From peer-admin-jump
+    proto: tcp
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From peer-admin-jump
+    proto: tcp
+    dport: '443'
+    source: 0.0.0.0/0
+  - type: OUT
+    action: ACCEPT
+    enable: 1
+    comment: From peer-admin-jump
+    proto: tcp
+    dport: '3000'
+    dest: 10.50.0.0/16
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From peer-admin-jump
+    proto: tcp
+    dport: '3000'
+    source: 10.50.0.0/16
+  - type: OUT
+    action: ACCEPT
+    enable: 1
+    comment: From peer-admin-jump
+    proto: tcp
+    dport: '3100'
+    dest: 10.50.0.0/16
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From peer-admin-jump
+    proto: tcp
+    dport: '3100'
+    source: 10.50.0.0/16
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-peer-jump
+    proto: tcp
+    dport: '22'
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-peer-jump
+    proto: tcp
+    dport: '22'
+    source: 93.240.197.170/32
+  peer-prod-website:
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-peer-web
+    proto: tcp
+    dport: '8443'
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-peer-web
+    proto: tcp
+    dport: '22'
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-peer-web
+    proto: tcp
+    dport: '443'
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-peer-web
+    proto: tcp
+    dport: '80'
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-test-websocket
+    proto: tcp
+    dport: '7072'
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-test-websocket
+    proto: tcp
+    dport: '7071'
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-test-websocket
+    proto: tcp
+    dport: '7071'
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-test-websocket
+    proto: tcp
+    dport: '22'
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-peer-web-testing
+    proto: tcp
+    dport: '22'
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-peer-web-testing
+    proto: tcp
+    dport: '8443'
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-peer-web-testing
+    proto: tcp
+    dport: '443'
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-peer-web-testing
+    proto: tcp
+    dport: '80'
+    source: 0.0.0.0/0
+  peer-prod-backend:
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-prod-backend
+    proto: tcp
+    dport: '443'
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-prod-backend
+    proto: tcp
+    dport: '80'
+    source: 0.0.0.0/0
+  - type: IN
+    action: ACCEPT
+    enable: 1
+    comment: From sg-prod-backend
+    proto: tcp
+    dport: '22'
+vm_metadata:
+  peer-prod-database:
+    ip: 192.168.1.210
+    vm_id: 102
+    role: database
+  peer-prod-admin:
+    ip: 192.168.1.50
+    vm_id: 103
+    role: admin
+  peer-prod-frontend:
+    ip: 192.168.1.120
+    vm_id: 100
+    role: frontend
+  peer-prod-bastion:
+    ip: 192.168.1.10
+    vm_id: 104
+    role: bastion
+  peer-prod-website:
+    ip: 192.168.1.110
+    vm_id: 106
+    role: website
+  peer-prod-backend:
+    ip: 192.168.1.200
+    vm_id: 105
+    role: backend

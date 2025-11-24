@@ -1,0 +1,378 @@
+---
+# Ansible Playbook: Apply Proxmox Firewall Rules (Inventory-Aware Version)
+# Version: 3.0 - Integrated with Ansible Inventory
+# 
+# This version automatically reads VM IDs from your inventory file!
+# No need to manually maintain VM ID mappings.
+#
+# Prerequisites:
+# 1. Proxmox API token configured
+# 2. Generated proxmox_firewall_rules.yml file
+# 3. inventory.yml with vm_id defined for each host
+#
+# Usage:
+#   # Dry run
+#   ansible-playbook -i inventory.yml apply_proxmox_firewall_v3.yml --check
+#
+#   # Apply to all VMs
+#   ansible-playbook -i inventory.yml apply_proxmox_firewall_v3.yml
+#
+#   # Apply to specific VM
+#   ansible-playbook -i inventory.yml apply_proxmox_firewall_v3.yml \
+#     -e target_vm=peer-prod-database
+#
+#   # Merge mode (keep existing rules)
+#   ansible-playbook -i inventory.yml apply_proxmox_firewall_v3.yml \
+#     -e merge_mode=true
+
+- name: Apply Firewall Rules to Proxmox VMs (Inventory-Aware)
+  hosts: localhost
+  gather_facts: no
+
+  vars_files:
+    - proxmox_firewall_rules.yml
+    - ../host_vars/proxmox_vault.yml
+
+  vars:
+    # ========================================================================
+    # PROXMOX CONFIGURATION
+    # ========================================================================
+    proxmox_unlock_key: '/home/peer/ansible/.passcode'
+
+    # API Configuration (use environment variables or Ansible Vault)
+    proxmox_api_host: "{{ lookup('env', 'PROXMOX_HOST') | default('192.168.1.1', true) }}"
+    proxmox_api_user: "{{ lookup('env', 'PROXMOX_USER') | default('root@pam', true) }}"
+    proxmox_api_token_name: "{{ lookup('env', 'PROXMOX_TOKEN_NAME') | default('ansible', true) }}"
+    proxmox_api_token: "{{ lookup('env', 'PROXMOX_TOKEN') }}"
+    proxmox_node: "{{ lookup('env', 'PROXMOX_NODE') | default('pve', true) }}"
+    
+    # ========================================================================
+    # PLAYBOOK OPTIONS
+    # ========================================================================
+    
+    # Target VM (leave empty for all, or specify one VM name)
+    target_vm: "{{ target_vm | default('', true) }}"
+    
+    # Merge mode: true = keep existing rules, false = replace all rules
+    merge_mode: "{{ merge_mode | default(false, true) }}"
+    
+    # Verbose output
+    verbose: "{{ verbose | default(true, true) }}"
+    
+    # API configuration
+    proxmox_api_headers:
+      Authorization: "PVEAPIToken={{ proxmox_api_user }}!{{ proxmox_api_token_name }}={{ proxmox_api_token }}"
+      Content-Type: "application/json"
+    
+    # Filter VMs based on target
+    vms_to_process: "{{ (target_vm != '') | ternary([target_vm], proxmox_firewall_rules.keys() | list) }}"
+  
+
+  environment:
+    PROXMOX_HOST: "{{ proxmox_host }}"
+    PROXMOX_TOKEN: "{{ proxmox_token }}"
+    PROXMOX_NODE: "{{ proxmox_node }}"
+  
+  pre_tasks:
+    # ========================================================================
+    # BUILD VM ID MAPPING FROM INVENTORY
+    # =====
+    # ===================================================================
+    - name: Check for '.passcode'
+      ansible.builtin.stat:
+        path: "{{ database_unlock_key }}"
+      register: peer_prod_pass_stat
+      delegate_to: 127.0.0.1      
+
+    - name: Debug each production host
+      debug:
+        msg: |
+          Debug INV name: {{ i }}
+          ansible_host: {{ hostvars[i].ansible_host }}
+          vm_id: {{ hostvars[i].vm_id }}
+      loop: "{{ groups['production'] }}"
+      loop_control:
+        loop_var: i
+
+    - name: Set target VM from extra vars or default to all
+      set_fact:
+        target_vm_name: "{{ target_vm | default('') }}"
+    
+    - name: Determine VMs to process
+      set_fact:
+        vms_to_process: "{{ (target_vm_name != '') | ternary([target_vm_name], proxmox_firewall_rules.keys() | list) }}"
+    
+    - name: Show final VM ID mapping
+      debug:
+        var: 
+          - inventory_vm_name 
+          - vms_to_process
+
+    - name: Display discovered VM IDs from inventory
+      debug:
+        msg:
+          - "VM IDs discovered from inventory:"
+          - "{{ inventory_vm_ids }}"
+      when: verbose | bool
+    
+    - name: Verify Proxmox API token is set
+      fail:
+        msg: |
+          PROXMOX_TOKEN environment variable is not set!
+          
+          Please configure API access:
+          export PROXMOX_TOKEN="your-token-here"
+          
+          Or use Ansible Vault. See PROXMOX_API_SETUP.md for details.
+      when: proxmox_api_token is not defined or proxmox_api_token == ""
+    
+    - name: Verify target VM exists
+      fail:
+        msg: "Target VM '{{ target_vm }}' not found in firewall rules!"
+      when: 
+        - target_vm != ''
+        - target_vm not in proxmox_firewall_rules
+    
+    - name: Verify all VMs have VM IDs in inventory
+      fail:
+        msg: "VM '{{ item }}' does not have vm_id defined in inventory!"
+      when: item not in inventory_vm_ids
+      loop: "{{ vms_to_process }}"
+    
+    - name: Display playbook configuration
+      debug:
+        msg:
+          - "╔════════════════════════════════════════════════════════════════╗"
+          - "║    PROXMOX FIREWALL CONFIGURATION (INVENTORY-AWARE)           ║"
+          - "╚════════════════════════════════════════════════════════════════╝"
+          - ""
+          - "Proxmox Configuration:"
+          - "  Host: {{ proxmox_api_host }}"
+          - "  Node: {{ proxmox_node }}"
+          - "  User: {{ proxmox_api_user }}"
+          - ""
+          - "Inventory Integration:"
+          - "  Using VM IDs from: inventory.yml"
+          - "  VMs with IDs: {{ inventory_vm_ids.keys() | list | join(', ') }}"
+          - ""
+          - "Playbook Options:"
+          - "  Mode: {{ ansible_check_mode | ternary('DRY-RUN (no changes)', 'APPLY') }}"
+          - "  Merge Mode: {{ merge_mode | ternary('MERGE (keep existing)', 'REPLACE (clear existing)') }}"
+          - "  Target VM: {{ target_vm | default('ALL VMs', true) }}"
+          - ""
+          - "VMs to Process:"
+          - "{% for vm in vms_to_process %}  - {{ vm }} (VMID: {{ inventory_vm_ids[vm] }})\n{% endfor %}"
+      when: verbose | bool
+  
+  tasks:
+    # ========================================================================
+    # STEP 1: Test API Connection
+    # ========================================================================
+    
+    - name: Test Proxmox API connection
+      uri:
+        url: "https://{{ proxmox_api_host }}:8006/api2/json/version"
+        method: GET
+        headers: "{{ proxmox_api_headers }}"
+        validate_certs: no
+        status_code: [200]
+      register: api_test
+      changed_when: false
+    
+    - name: Display Proxmox version
+      debug:
+        msg: "✓ Connected to Proxmox {{ api_test.json.data.version }}"
+      when: verbose | bool
+    
+    # ========================================================================
+    # STEP 2: Verify VMs Exist
+    # ========================================================================
+    
+    - name: Verify VMs exist on Proxmox
+      uri:
+        url: "https://{{ proxmox_api_host }}:8006/api2/json/nodes/{{ proxmox_node }}/qemu/{{ inventory_vm_ids[item] }}/status/current"
+        method: GET
+        headers: "{{ proxmox_api_headers }}"
+        validate_certs: no
+        status_code: [200, 500]
+      loop: "{{ vms_to_process }}"
+      register: vm_status
+      changed_when: false
+      failed_when: false
+    
+    - name: Check for missing VMs
+      fail:
+        msg: "VM '{{ item.item }}' (ID: {{ inventory_vm_ids[item.item] }}) not found on Proxmox!"
+      when: item.status != 200
+      loop: "{{ vm_status.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+    
+    # ========================================================================
+    # STEP 3: Get Current Firewall Configuration
+    # ========================================================================
+    
+    - name: Get current firewall rules for each VM
+      uri:
+        url: "https://{{ proxmox_api_host }}:8006/api2/json/nodes/{{ proxmox_node }}/qemu/{{ inventory_vm_ids[item] }}/firewall/rules"
+        method: GET
+        headers: "{{ proxmox_api_headers }}"
+        validate_certs: no
+        status_code: [200]
+      loop: "{{ vms_to_process }}"
+      register: current_firewall_rules
+      changed_when: false
+    
+    - name: Display current rule counts
+      debug:
+        msg: "{{ item.item }}: {{ item.json.data | default([]) | length }} existing rules"
+      loop: "{{ current_firewall_rules.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+      when: verbose | bool
+    
+    # ========================================================================
+    # STEP 4: Enable Firewall on VMs
+    # ========================================================================
+    
+    - name: Enable firewall on VM level
+      uri:
+        url: "https://{{ proxmox_api_host }}:8006/api2/json/nodes/{{ proxmox_node }}/qemu/{{ inventory_vm_ids[item] }}/firewall/options"
+        method: PUT
+        headers: "{{ proxmox_api_headers }}"
+        validate_certs: no
+        body_format: json
+        body:
+          enable: 1
+        status_code: [200]
+      loop: "{{ vms_to_process }}"
+      when: not ansible_check_mode
+      register: firewall_enable
+    
+    # ========================================================================
+    # STEP 5: Clear Existing Rules (if not in merge mode)
+    # ========================================================================
+    
+    - name: Clear existing firewall rules
+      uri:
+        url: "https://{{ proxmox_api_host }}:8006/api2/json/nodes/{{ proxmox_node }}/qemu/{{ inventory_vm_ids[item.0.item] }}/firewall/rules/{{ item.1.pos }}"
+        method: DELETE
+        headers: "{{ proxmox_api_headers }}"
+        validate_certs: no
+        status_code: [200]
+      loop: "{{ current_firewall_rules.results | subelements('json.data', skip_missing=True) }}"
+      loop_control:
+        label: "{{ item.0.item }} - rule {{ item.1.pos }}"
+      when: 
+        - not ansible_check_mode
+        - not (merge_mode | bool)
+        - item.1.pos is defined
+      register: rules_cleared
+    
+    - name: Report rules cleared
+      debug:
+        msg: "✓ Cleared {{ rules_cleared.results | selectattr('skipped', 'undefined') | list | length }} existing rules"
+      when: 
+        - verbose | bool
+        - not (merge_mode | bool)
+        - not ansible_check_mode
+    
+    # ========================================================================
+    # STEP 6: Apply New Firewall Rules
+    # ========================================================================
+    
+    - name: Apply firewall rules to Proxmox VMs
+      uri:
+        url: "https://{{ proxmox_api_host }}:8006/api2/json/nodes/{{ proxmox_node }}/qemu/{{ inventory_vm_ids[item.0.key] }}/firewall/rules"
+        method: POST
+        headers: "{{ proxmox_api_headers }}"
+        validate_certs: no
+        body_format: form-urlencoded
+        body: "{{ item.1 }}"
+        status_code: [200]
+      loop: "{{ proxmox_firewall_rules | dict2items | selectattr('key', 'in', vms_to_process) | list | subelements('value') }}"
+      loop_control:
+        label: "{{ item.0.key }} (VMID: {{ inventory_vm_ids[item.0.key] }}) - {{ item.1.comment | default('rule') }}"
+      register: firewall_apply_result
+      when: not ansible_check_mode
+    
+    # ========================================================================
+    # STEP 7: Verify Applied Rules
+    # ========================================================================
+    
+    - name: Get updated firewall rules
+      uri:
+        url: "https://{{ proxmox_api_host }}:8006/api2/json/nodes/{{ proxmox_node }}/qemu/{{ inventory_vm_ids[item] }}/firewall/rules"
+        method: GET
+        headers: "{{ proxmox_api_headers }}"
+        validate_certs: no
+        status_code: [200]
+      loop: "{{ vms_to_process }}"
+      register: updated_firewall_rules
+      changed_when: false
+      when: not ansible_check_mode
+  
+  post_tasks:
+    # ========================================================================
+    # FINAL REPORT
+    # ========================================================================
+    
+    - name: Generate summary report
+      set_fact:
+        summary_data:
+          total_vms: "{{ vms_to_process | length }}"
+          rules_per_vm: "{{ dict(vms_to_process | zip(vms_to_process | map('extract', proxmox_firewall_rules) | map('length'))) }}"
+          total_rules: "{{ vms_to_process | map('extract', proxmox_firewall_rules) | map('length') | sum }}"
+          vm_ids_used: "{{ dict(vms_to_process | zip(vms_to_process | map('extract', inventory_vm_ids))) }}"
+    
+    - name: Display completion summary (apply mode)
+      debug:
+        msg:
+          - ""
+          - "╔════════════════════════════════════════════════════════════════╗"
+          - "║          FIREWALL CONFIGURATION COMPLETE                       ║"
+          - "╚════════════════════════════════════════════════════════════════╝"
+          - ""
+          - "Summary:"
+          - "  VMs Configured: {{ summary_data.total_vms }}"
+          - "  Total Rules Applied: {{ summary_data.total_rules }}"
+          - "  Mode: {{ merge_mode | ternary('MERGED with existing', 'REPLACED existing') }}"
+          - "  VM IDs: Read from inventory.yml ✓"
+          - ""
+          - "Rules per VM:"
+          - "{% for vm, count in summary_data.rules_per_vm.items() %}  - {{ vm }} (VMID {{ summary_data.vm_ids_used[vm] }}): {{ count }} rules\n{% endfor %}"
+          - "✓ Firewall configuration successful!"
+          - ""
+          - "Next Steps:"
+          - "  1. Verify rules in Proxmox UI: VM → Firewall → Rules"
+          - "  2. Test connectivity to ensure services work"
+          - "  3. Monitor logs for blocked connections"
+          - ""
+      when: not ansible_check_mode
+    
+    - name: Display dry-run summary
+      debug:
+        msg:
+          - ""
+          - "╔════════════════════════════════════════════════════════════════╗"
+          - "║                   DRY-RUN COMPLETE                             ║"
+          - "╚════════════════════════════════════════════════════════════════╝"
+          - ""
+          - "No changes were made. This was a simulation."
+          - ""
+          - "Would configure:"
+          - "  VMs: {{ summary_data.total_vms }}"
+          - "  Total Rules: {{ summary_data.total_rules }}"
+          - "  Mode: {{ merge_mode | ternary('MERGE', 'REPLACE') }}"
+          - "  Using VM IDs from: inventory.yml"
+          - ""
+          - "VM IDs that would be used:"
+          - "{% for vm, vmid in summary_data.vm_ids_used.items() %}  - {{ vm }}: VMID {{ vmid }}\n{% endfor %}"
+          - ""
+          - "Rules that would be applied:"
+          - "{% for vm, count in summary_data.rules_per_vm.items() %}  - {{ vm }}: {{ count }} rules\n{% endfor %}"
+          - ""
+          - "To apply these changes, run without --check flag:"
+          - "  ansible-playbook -i inventory.yml apply_proxmox_firewall_v3.yml"
+          - ""
+      when: ansible_check_mode
