@@ -17,6 +17,10 @@
   delegate_to: localhost
   become: no
 
+- name: "What server am I on and define the correct value"  
+
+
+
 - name: "Installing Nginx:  Setup Nginx configuration from docker/nginx/default.conf"
   when: nginx_conf_source.stat.exists
   block:
