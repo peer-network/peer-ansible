@@ -36,7 +36,7 @@
 
     - name: is nginx running
       ansible.builtin.meta: end_play
-      when: nginx_result.enabled = false
+      when: nginx_result.enabled is false
 
     - name: Check if template exists in nginx role
       stat:
