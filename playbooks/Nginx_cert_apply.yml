@@ -28,11 +28,30 @@
 
 
   ### Thisis a role of roles, as 'backend' will call other roles  
-  tasks:
-    - import_role:
-        name: nginx
-        template_from: peerapp_server_config.j2
+tasks:
+  - name: Check if template exists in nginx role
+    stat:
+      path: "{{ role_path }}/../nginx/templates/peerapp_server_config.j2"
+    register: nginx_template
 
-    - name: debug stop
-      debug: 
-        msg: Stoped at debug nginx update
+  - name: Create default template if it doesn't exist
+    copy:
+      content: |
+        # Default peerapp server configuration
+        server {
+            listen 80;
+            server_name {{ ansible_hostname }};
+            # Add your default config here
+        }
+      dest: "{{ role_path }}/../nginx/templates/peerapp_server_config.j2"
+    when: not nginx_template.stat.exists
+
+  - name: Use template from nginx role
+    template:
+      src: "{{ role_path }}/../nginx/templates/peerapp_server_config.j2"
+      dest: "{{ playbook_dir }}/temp/peerapp_server_config.j2"
+
+
+  - name: debug stop
+    debug: 
+      msg: Stoped at debug nginx update
