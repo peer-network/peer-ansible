@@ -1,0 +1,38 @@
+# ==================================================
+# FILE: nginx_cert_apply.yml
+# Playbook to install update and apply SSL certs to web-servers
+# ==================================================
+---
+
+- name: Update web (frontfacing) servers to nginx configs 
+  hosts: nginx_web
+  become: yes
+  
+  vars:
+
+  ### Var file for nginx 
+  ##
+  ## Need toe map from hostname to domain
+  domain_mapping:
+    peer-prod-frontend: "frontend.peerapp.eu"
+    peer-prod-website: "website.peerapp.eu"
+    peer-prod-backend: 
+      - "peerapp.eu"
+      - "www.peerapp.eu"
+
+  pre_tasks: 
+    - name: Is nginx installed, if not end play
+      ansible.builtin.meta: end_play  
+      when: not nginx_conf_source.stat.exists
+    
+
+
+  ### Thisis a role of roles, as 'backend' will call other roles  
+  tasks:
+    - import_role:
+        name: nginx
+        template_from: peerapp_server_config.j2
+
+    - name: debug stop
+      debug: 
+        msg: Stoped at debug nginx update

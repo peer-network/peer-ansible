@@ -92,8 +92,8 @@ all:
         database_servers:
         admin_servers:
     
-    # Group VMs that need public access via HAProxy
-    public_web:
+    # Group VMs that need public and nginx certs access via HAProxy
+    nginx_web:
       children:
         web_servers:
         app_servers:
