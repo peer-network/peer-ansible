@@ -21,14 +21,23 @@
         - "www.peerapp.eu"
 
   pre_tasks: 
-    - name: Is nginx installed, if not end play
-      ansible.builtin.meta: end_play  
-      when: not nginx_conf_source.stat.exists
+    - name: Make sure 'nginx' is started
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes
+      register: nginx_result
     
-
-
   ### Thisis a role of roles, as 'backend' will call other roles  
   tasks:
+    - name: debug is nginx running
+      debug:
+        msg: "{{ nginx_result }}"
+
+    - name: is nginx running
+      ansible.builtin.meta: end_play
+      when: not nginx_result.exist
+
     - name: Check if template exists in nginx role
       stat:
         path: "{{ role_path }}/../nginx/templates/peerapp_server_config.j2"
