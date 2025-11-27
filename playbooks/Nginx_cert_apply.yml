@@ -40,7 +40,7 @@
 
     - name: Check if template exists in nginx role
       stat:
-        path: "{{ role_path }}/../nginx/templates/peerapp_server_config.j2"
+        path: "{{ playbook_dir }}/../roles/nginx/templates/peerapp_server_config.j2"
       register: nginx_template
 
     - name: Create default template if it doesn't exist
@@ -52,12 +52,12 @@
               server_name {{ ansible_hostname }};
               # Add your default config here
           }
-        dest: "{{ role_path }}/../nginx/templates/peerapp_server_config.j2"
+        dest: "{{ playbook_dir }}/../nginx/templates/peerapp_server_config.j2"
       when: not nginx_template.stat.exists
 
     - name: Use template from nginx role
       template:
-        src: "{{ role_path }}/../nginx/templates/peerapp_server_config.j2"
+        src: "{{ playbook_dir }}/../nginx/templates/peerapp_server_config.j2"
         dest: "{{ playbook_dir }}/temp/peerapp_server_config.j2"
 
 
