@@ -5,9 +5,9 @@
 
 {% set domain = domain_mapping[ansible_hostname] %}
 {% if domain is string %}
-ServerName {{ domain }}
+{% set ServerName={{ domain }} %}
 {% else %}
-ServerName {{ domain[1:] | join(' ') }}
+{% set ServerName={{ domain[1:] | join(' ') }} %}
 {% endif %}
 
 
