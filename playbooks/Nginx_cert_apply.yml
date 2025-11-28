@@ -27,9 +27,7 @@
         state: started
         enabled: yes
       register: nginx_result
-    
-  ### Thisis a role of roles, as 'backend' will call other roles  
-  tasks:
+
     - name: debug is nginx running
       debug:
         msg: "{{ nginx_result }}"
@@ -37,30 +35,26 @@
     - name: is nginx running
       ansible.builtin.meta: end_play
       when: nginx_result.enabled is false
+    
+  ### Thisis a role of roles, as 'backend' will call other roles  
+  roles:
+    - nginx_cert_update  
+  ### Thisis a role of roles, as 'backend' will call other roles  
+  tasks:
+    
+  post_tasks:
+    - name: Display completion message
+      debug:
+        msg:
+          - "=========================================="
+          - "Nginx update complete!"
+          - "=========================================="
+          - "Services installed:"
+          - "  - certbot"
+          - "  - dns settings"
+          - "  - restarted nginx"
+          - "  - new config"
+          - "Next steps:"
+          - "  1. Set and test nginx on the server for SSL keys"
 
-    - name: Check if template exists in nginx role
-      stat:
-        path: "{{ playbook_dir }}/../roles/nginx/templates/peerapp_server_config.j2"
-      register: nginx_template
-
-    - name: Create default template if it doesn't exist
-      copy:
-        content: |
-          # Default peerapp server configuration
-          server {
-              listen 80;
-              server_name {{ ansible_hostname }};
-              # Add your default config here
-          }
-        dest: "{{ playbook_dir }}/../nginx/templates/peerapp_server_config.j2"
-      when: not nginx_template.stat.exists
-
-    - name: Use template from nginx role
-      template:
-        src: "{{ playbook_dir }}/../nginx/templates/peerapp_server_config.j2"
-        dest: "{{ playbook_dir }}/temp/peerapp_server_config.j2"
-
-
-    - name: debug stop
-      debug: 
-        msg: Stoped at debug nginx update
+          - "=========================================="

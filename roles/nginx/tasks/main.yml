@@ -17,41 +17,4 @@
   delegate_to: localhost
   become: no
 
-- name: "What server am I on and define the correct value"  
-
-
-
-- name: "Installing Nginx:  Setup Nginx configuration from docker/nginx/default.conf"
-  when: nginx_conf_source.stat.exists
-  block:
-    - name: Copy default.conf to server
-      copy:
-        src: "{{ playbook_dir }}/../docker/nginx/default.conf"
-        dest: /etc/nginx/sites-available/default
-        owner: root
-        group: root
-        mode: '0644'
-      notify: Restart Nginx
-
-- name: "Installing Nginx:  Setup Nginx configuration from role files"
-  when: not nginx_conf_source.stat.exists
-  block:
-    - name: Display warning about missing docker/nginx/default.conf
-      debug:
-        msg: "Warning: ./docker/nginx/default.conf not found, using default from role"
-
-    - name: Copy default.conf from role files
-      template:
-        src: default.j2
-        dest: /etc/nginx/sites-available/default
-        owner: root
-        group: root
-        mode: '0644'
-      notify: Restart Nginx
-
-- name: "Installing Nginx:  Ensure default site is enabled"
-  file:
-    src: /etc/nginx/sites-available/default
-    dest: /etc/nginx/sites-enabled/default
-    state: link
-  notify: Restart Nginx
+# - name: "What server am I on and define the correct value"  
