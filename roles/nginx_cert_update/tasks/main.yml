@@ -1,0 +1,25 @@
+# ==================================================
+# FILE: roles/nginx/tasks/main.yml
+# Installing Nginx:  Setup Nginx configuration
+# Matches: cp ./docker/nginx/default.conf ... && systemctl restart
+# ==================================================
+---
+- name: Display update nginx setup message
+  debug:
+    msg: "Adding SSL keys to web-facing servers (vm)"
+
+- name: Copy a version of nginx.conf 
+  ansible.builtin.template:
+    scr: nginx_cert_update/templates/peerapp_server_config.j2
+    dest: /etc/nginx/sites-available/peerapp
+    mode: '0644'
+
+- name: Display peerapp contents
+  command: cat /etc/nginx/sites-available/peerapp chdir=/etc
+  register: peearapp_output
+
+- name: print out the peerapp file
+  debug:
+    msg: "{{ peearapp_output.stdout }}"
+
+
