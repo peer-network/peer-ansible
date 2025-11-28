@@ -7,14 +7,13 @@
 {% if domain is string %}
 ServerName {{ domain }}
 {% else %}
-ServerName {{ domain[0] }}
-ServerAlias {{ domain[1:] | join(' ') }}
+ServerName {{ domain[1:] | join(' ') }}
 {% endif %}
 
 
 server {
     listen 80;
-    server_name "{{ ServerAlias }}";
+    server_name "{{ ServerName }}";
     root /var/www/html;
     index index.php index.html;
     
