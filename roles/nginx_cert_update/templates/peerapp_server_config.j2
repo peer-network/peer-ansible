@@ -3,17 +3,9 @@
 # website.peerapp.eu -> website
 # peerapp.eu /www.peerapp.eu -> backend
 
-{% set domain = domain_mapping[ansible_hostname] %}
-{% if domain is string %}
-{% set ServerName = domain %}
-{% else %}
-{% set ServerName = domain[1:]|join(' ') %}
-{% endif %}
-
-
 server {
     listen 80;
-    server_name "{{ ServerName }}";
+    server_name "{{ ansible_hostname[domains] }}";
     root /var/www/html;
     index index.php index.html;
     
