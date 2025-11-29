@@ -27,6 +27,7 @@
         state: started
         enabled: yes
       register: nginx_result
+      ignore_errors: true
 
     - name: debug is nginx running
       debug:
