@@ -5,7 +5,7 @@
 ---
 
 - name: Update web (frontfacing) servers to nginx configs 
-  hosts: peer-prod-backend # nginx_web
+  hosts: peer-prod-website # nginx_web
   become: yes
   
   vars:
@@ -40,7 +40,7 @@
   roles:
     - nginx_cert_update  
   ### Thisis a role of roles, as 'backend' will call other roles  
-  
+
   tasks:
     
   post_tasks:
