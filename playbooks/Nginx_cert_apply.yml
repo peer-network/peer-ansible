@@ -9,18 +9,7 @@
   become: yes
   
   vars:
-
-  ### Var file for nginx 
-  ##
-  ## Need toe map from hostname to domain
-  ##
-  ## Moved to inventory vars 
-  # domain_mapping:
-  #   peer-prod-frontend: "frontend.peerapp.eu"
-  #   peer-prod-website: "website.peerapp.eu"
-  #   peer-prod-backend: 
-  #     - "peerapp.eu"
-  #     - "www.peerapp.eu"
+    nginx_debug: true
 
   pre_tasks: 
     - name: Make sure 'nginx' is started
@@ -33,7 +22,6 @@
       ignore_errors: true
 
   # $ sudo systemctl unmask nginx.service
-
 
     - name: debug is nginx running
       debug:

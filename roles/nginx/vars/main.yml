@@ -1,7 +1,7 @@
 ### Var file for nginx 
 ##
 ## Need toe map from hostname to domain
-##
+## Handlled in the inventory 
 
 domain_mapping:
   peer-prod-frontend: "frontend.peerapp.eu"

@@ -8,7 +8,7 @@
   debug:
     msg: "Adding SSL keys to web-facing servers (vm)"
 
-- name: Copy a version of nginx.conf 
+- name: Copy the defaults with the hostname-DNS doain to nginx.conf 
   ansible.builtin.template:
     src: peerapp_server_config.j2
     dest: /etc/nginx/sites-available/peerapp
@@ -22,5 +22,26 @@
 - name: print out the peerapp file
   debug:
     msg: "{{ peearapp_output.stdout }}"
+  when: nginx_debug is true
 
+- name: "install cert bot to {{ ansible_host }}"
+  ansible.builtin.apt:
+    name: 
+      - certbot 
+      - python3-certbot-nginx
+    state: present
 
+- name: Certbot run
+	ansible.builtin.command:
+    argv:
+      - certbot 
+      - --nginx 
+      - -d peernetwork.eu 
+      - -d www.peernetwork.eu 
+      - -d media.peernetwork.eu
+  become: yes
+  register: certbot_output
+
+- name: "certbot {{ ansible_host }}" 
+  debug:
+    msg: "output from certbot {{ certbot_output }}" 
