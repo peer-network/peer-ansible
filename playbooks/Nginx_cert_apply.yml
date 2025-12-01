@@ -5,7 +5,7 @@
 ---
 
 - name: Update web (frontfacing) servers to nginx configs 
-  hosts: peer-prod-website # nginx_web
+  hosts: peer-prod-backend # nginx_web
   become: yes
   
   vars:
