@@ -1,0 +1,24 @@
+## For base peer-network config 
+# frontend.peerapp.eu -> point at web-frontend
+# website.peerapp.eu -> website
+# peerapp.eu /www.peerapp.eu -> backend
+
+server {
+    listen 80;
+    server_name {{ domains | join(' ') }};
+    root /var/www/html;
+    index index.php index.html;
+    
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+    
+    location ~ /\.ht {
+        deny all;
+    }
+    
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+    }
+}
