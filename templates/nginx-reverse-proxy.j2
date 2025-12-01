@@ -1,10 +1,10 @@
-# Frontend - peerapp.eu
+# Website - peerapp.eu, www.peerapp.eu
 server {
     listen 80;
     server_name peerapp.eu www.peerapp.eu;
     
     location / {
-        proxy_pass http://192.168.1.120:8080;
+        proxy_pass http://{{ hostvars['peer-prod-website']['ansible_host'] }}:80;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -12,13 +12,13 @@ server {
     }
 }
 
-# Backend - backend.peerapp.eu
+# Frontend - frontend.peerapp.eu
 server {
     listen 80;
-    server_name backend.peerapp.eu;
+    server_name frontend.peerapp.eu;
     
     location / {
-        proxy_pass http://192.168.1.200:3000;
+        proxy_pass http://{{ hostvars['peer-prod-frontend']['ansible_host'] }}:80;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -26,13 +26,13 @@ server {
     }
 }
 
-# Website - (your main domain)
+# Backend - backend.peerapp.eu, media.peerapp.eu
 server {
     listen 80;
-    server_name your-website-domain.com;  # Replace with actual domain
+    server_name backend.peerapp.eu media.peerapp.eu;
     
     location / {
-        proxy_pass http://192.168.1.110:80;
+        proxy_pass http://{{ hostvars['peer-prod-backend']['ansible_host'] }}:80;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
