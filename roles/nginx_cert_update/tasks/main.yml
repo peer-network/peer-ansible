@@ -24,7 +24,7 @@
     msg: "{{ peearapp_output.stdout }}"
   when: nginx_debug is true
 
-- name: "install cert bot to {{ ansible_host }}"
+- name: "install certbot for domains {{ ansible_host['domains'] }}"
   ansible.builtin.apt:
     name: 
       - certbot 
@@ -36,12 +36,19 @@
     argv:
       - certbot 
       - --nginx 
-      - -d peernetwork.eu 
-      - -d www.peernetwork.eu 
-      - -d media.peernetwork.eu
+      - -d peerapp.eu 
+      - -d www.peerapp.eu 
+      - -d media.peerapp.eu
   become: yes
   register: certbot_output
 
 - name: "certbot {{ ansible_host }}" 
   debug:
     msg: "output from certbot {{ certbot_output }}" 
+
+- name: Copy the defaults with the hostname-DNS doain to nginx.conf 
+  ansible.builtin.template:
+    src: peerapp_server_config.j2
+    dest: /etc/nginx/sites-available/peerapp
+    mode: '0644'
+  notify: Restart Nginx
