@@ -32,7 +32,7 @@
     state: present
 
 - name: Certbot run
-	ansible.builtin.command:
+  ansible.builtin.command:
     argv:
       - certbot 
       - --nginx 
