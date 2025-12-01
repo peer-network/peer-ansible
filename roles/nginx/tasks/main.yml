@@ -10,7 +10,7 @@
     state: started
     enabled: yes
 
-- name: "Installing Nginx:  Check if nginx default.conf exists in source"ansible
+- name: "Installing Nginx:  Check if nginx default.conf exists in source"
   stat:
     path: "{{ playbook_dir }}/../docker/nginx/default.conf"
   register: nginx_conf_source
