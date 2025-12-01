@@ -13,12 +13,14 @@
   ### Var file for nginx 
   ##
   ## Need toe map from hostname to domain
-    domain_mapping:
-      peer-prod-frontend: "frontend.peerapp.eu"
-      peer-prod-website: "website.peerapp.eu"
-      peer-prod-backend: 
-        - "peerapp.eu"
-        - "www.peerapp.eu"
+  ##
+  ## Moved to inventory vars 
+  # domain_mapping:
+  #   peer-prod-frontend: "frontend.peerapp.eu"
+  #   peer-prod-website: "website.peerapp.eu"
+  #   peer-prod-backend: 
+  #     - "peerapp.eu"
+  #     - "www.peerapp.eu"
 
   pre_tasks: 
     - name: Make sure 'nginx' is started
@@ -26,8 +28,12 @@
         name: nginx
         state: started
         enabled: yes
+        masked: no
       register: nginx_result
       ignore_errors: true
+
+  # $ sudo systemctl unmask nginx.service
+
 
     - name: debug is nginx running
       debug:
