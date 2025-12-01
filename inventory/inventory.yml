@@ -13,6 +13,13 @@ all:
     # Production environment
     production:
       children:
+        proxmox:
+          hosts:
+            proxmox_host:
+              ansible_host: 162.19.169.215
+              ansible_user: peer  # or root if you use root
+              ansible_ssh_private_key_file: ~/.ssh/ovh-host
+              ansible_port: 22
         web_servers:
           hosts:
             peer-prod-website:
@@ -95,3 +102,7 @@ all:
       children:
         web_servers:
         app_servers:
+
+    proxmox:
+      children:
+
