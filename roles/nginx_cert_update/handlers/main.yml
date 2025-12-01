@@ -3,11 +3,12 @@
 # ==================================================
 ---
 - name: Reload Nginx
-  systemd:
+  ansible.builtin.service:
     name: nginx
     state: reloaded
 
+
 - name: Restart Nginx
-  systemd:
+  ansible.builtin.service:
     name: nginx
     state: restarted
