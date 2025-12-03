@@ -1,0 +1,49 @@
+# ==================================================
+# FILE: roles/Frontend/tasks/main.yml
+# Frontend server setup (combines PHP, Nginx, Rust)
+# ==================================================
+---
+- name: Display Frontend setup message
+  debug:
+    msg: "Setting up Frontend server with PHP 8.3, Nginx, and Rust"
+
+# The actual installation is handled by role dependencies
+# defined in roles/Frontend/meta/main.yml
+
+- name: Ensure all services are running
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: yes
+  loop:
+    - nginx
+    - php8.3-fpm
+
+- name: Verify PHP-FPM socket exists
+  stat:
+    path: /run/php/php8.3-fpm.sock
+  register: php_sock
+  failed_when: not php_sock.stat.exists
+
+- name: Display Frontend server info
+  debug:
+    msg:
+      - "Frontend server setup complete!"
+      - "PHP Version: 8.3"
+      - "Web Server: Nginx"
+      - "Document Root: /var/www/html/public"
+      - "Test URL: http://{{ ansible_host }}/test.php"
+
+### Set permissions for nginx and php to use
+##  for the directories 
+- name: Set directory ownership recursively
+  file:
+    path: /var/www/html
+    owner: www-data
+    group: www-data
+    recurse: yes
+
+
+
+
+

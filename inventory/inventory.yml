@@ -42,7 +42,7 @@ all:
               role: frontend
               domains:
                 - frontend.peerapp.eu
-                #- www.frontend.peerapp.eu
+                - www.frontend.peerapp.eu
         
         app_servers:
           hosts:
@@ -54,8 +54,8 @@ all:
               disk_gb: 50
               role: backend
               domains:
-                #- media.peerapp.eu
-                #- www.media.peerapp.eu
+                - media.peerapp.eu
+                - www.media.peerapp.eu
                 - backend.peerapp.eu
         
         database_servers:
