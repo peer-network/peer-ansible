@@ -50,7 +50,7 @@
 - name: Link the new frontend_apache config to the default in enabled 
   ansible.builtin.file:
     src: /etc/apache2/sites-available/frontend_peerapp.conf
-    dest: etc/apache2/sites-enabled/000-default.conf
+    dest: /etc/apache2/sites-enabled/000-default.conf
     owner: root
     group: root
     state: link
