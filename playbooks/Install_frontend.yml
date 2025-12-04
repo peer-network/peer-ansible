@@ -29,7 +29,7 @@
           - "=========================================="
           - "Services installed:"
           - "  - PHP 8.3 with PHP-FPM"
-          - "  - Nginx web server"
+          - "  - Apache2 web server"
           - "  - Composer"
           - "  - Rust and Cargo"
           - "  - FFmpeg"

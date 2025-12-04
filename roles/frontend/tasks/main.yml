@@ -16,7 +16,7 @@
     state: started
     enabled: yes
   loop:
-    - nginx
+    - apache2
     - php8.3-fpm
 
 - name: Verify PHP-FPM socket exists
@@ -30,7 +30,7 @@
     msg:
       - "Frontend server setup complete!"
       - "PHP Version: 8.3"
-      - "Web Server: Nginx"
+      - "Web Server: Apache"
       - "Document Root: /var/www/html/public"
       - "Test URL: http://{{ ansible_host }}/test.php"
 
