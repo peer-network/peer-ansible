@@ -34,6 +34,28 @@
       - "Document Root: /var/www/html/public"
       - "Test URL: http://{{ ansible_host }}/test.php"
 
+- name: "install certbot for domains {{ ansible_host['domains'] }}"
+  ansible.builtin.apt:
+    name: 
+      - certbot 
+      - python3-certbot-nginx
+    state: present
+
+- name: Copy Peer frontend template to apache2  
+  ansible.builtin.template:
+    src: frontend_apache.j2
+    dest: /etc/apache2/sites-available/frontend_peerapp.conf
+    mode: '0644'
+
+- name: Link the new frontend_apache config to the default in enabled 
+  ansible.builtin.file:
+    src: /etc/apache2/sites-available/frontend_peerapp.conf
+    dest: etc/apache2/sites-enabled/000-default.conf
+    owner: root
+    group: root
+    state: link
+  notify: Restart Apache2
+
 ### Set permissions for nginx and php to use
 ##  for the directories 
 - name: Set directory ownership recursively

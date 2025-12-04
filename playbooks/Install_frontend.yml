@@ -14,6 +14,7 @@
     php_upload_max: "510M"
     php_post_max: "510M"
     php_max_execution_time: "3600"
+    apache_server_name: "frontend.peerapp.eu"
     # ansible_user: "{{ ansible_user | default('peer') }}"
     
   ### Thisis a role of roles, as 'Frontend' will call other roles  
