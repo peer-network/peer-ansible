@@ -1,12 +1,12 @@
 <VirtualHost *:443>
-    ServerName frontend.getpeer.eu
+    ServerName {{ apache_server_name }}
     DocumentRoot /var/www/html
 
     SSLEngine on
     SSLProtocol all -SSLv2 -SSLv3
     SSLCipherSuite HIGH:!aNULL:!MD5
-    SSLCertificateFile /etc/letsencrypt/live/frontend.getpeer.eu/fullchain.pem
-    SSLCertificateKeyFile /etc/letsencrypt/live/frontend.getpeer.eu/privkey.pem
+    SSLCertificateFile /etc/letsencrypt/live/{{ apache_server_name }}/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/{{ apache_server_name }}/privkey.pem
 
     <FilesMatch "\.(cgi|shtml|phtml|php)$">
         SSLOptions +StdEnvVars
@@ -27,5 +27,5 @@
     ServerName frontend.getpeer.eu
 
     # Redirect all HTTP requests to HTTPS domain
-    Redirect permanent / https://frontend.getpeer.eu/
+    Redirect permanent / https://{{ apache_server_name }}/
 </VirtualHost>
