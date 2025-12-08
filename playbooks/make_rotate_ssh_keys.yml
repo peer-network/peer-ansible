@@ -10,13 +10,13 @@
   become: yes
   
   vars:
+    ssh-type: "ed25519" 
     # You can override these in your inventory
     # The passcode is testing_peer_beta
     #  ssh-bit-size: 
-    ssh-type: "ed25519" 
-    
-  pre_tasks:
 
+
+  pre_tasks:
   - name: Test on bastion
     when: ansible_host is 'peer-prod-bastion'
     block:
