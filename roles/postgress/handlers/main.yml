@@ -11,3 +11,13 @@
   systemd:
     name: psql
     state: reloaded
+
+- name: Restart PostgreSQL
+  systemd:
+    name: postgresql
+    state: restarted
+
+- name: Reload PostgreSQL
+  systemd:
+    name: postgresql
+    state: reloaded

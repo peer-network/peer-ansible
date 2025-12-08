@@ -1,4 +1,13 @@
 ### Vars for all of Peer
 ##
 ---
-gateway_ip: "192.168.1.1"
+Internal_Gateway: "192.168.1.1"
+External_Host: "162.19.169.215" # Host IP
+
+Internal_Database: "{{ hostvars['peer-prod-database']['ansible_host'] }}"
+Internal_Backend: "{{ hostvars['peer-prod-backend']['ansible_host'] }}"
+Internal_Bastion: "{{ hostvars['peer-prod-bastion']['ansible_host'] }}"
+Internal_Website: "{{ hostvars['peer-prod-website']['ansible_host'] }}"
+Internal_Frontend: "{{ hostvars['peer-prod-frontend']['ansible_host'] }}"
+internal_Admin: "{{ hostvars['peer-prod-admin']['ansible_host'] }}"
+

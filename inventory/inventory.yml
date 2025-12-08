@@ -7,11 +7,19 @@ all:
     ansible_ssh_private_key_file: ~/.ssh/ovh-host
     ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
     ansible_python_interpreter: /usr/bin/python3
-  
+    proxmox_host: 162.19.169.215
+
   children:
     # Production environment
     production:
       children:
+        proxmox:
+          hosts:
+            proxmox_host:
+              ansible_host: 162.19.169.215
+              ansible_user: peer  # or root if you use root
+              ansible_ssh_private_key_file: ~/.ssh/ovh-host
+              ansible_port: 22
         web_servers:
           hosts:
             peer-prod-website:
@@ -24,8 +32,6 @@ all:
               domains:
                 - peerapp.eu
                 - www.peerapp.eu
-                - website.peerapp.eu
-                - www.website.peerapp.eu
             
             peer-prod-frontend:
               ansible_host: 192.168.1.120
@@ -91,8 +97,12 @@ all:
         database_servers:
         admin_servers:
     
-    # Group VMs that need public access via HAProxy
-    public_web:
+    # Group VMs that need public and nginx certs access via HAProxy
+    nginx_web:
       children:
         web_servers:
         app_servers:
+
+    proxmox:
+      children:
+

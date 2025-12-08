@@ -1,0 +1,56 @@
+# ==================================================
+# FILE: nginx_cert_apply.yml
+# Playbook to install update and apply SSL certs to web-servers
+# ==================================================
+---
+
+- name: Update web (frontfacing) servers to nginx configs 
+  hosts: peer-prod-backend # nginx_web
+  become: yes
+  
+  vars:
+    nginx_debug: true
+
+  pre_tasks: 
+    - name: Make sure 'nginx' is started
+      systemd:
+        name: nginx
+        state: started
+        enabled: yes
+        masked: no
+      register: nginx_result
+      ignore_errors: true
+
+  # $ sudo systemctl unmask nginx.service
+
+    - name: debug is nginx running
+      debug:
+        msg: "{{ nginx_result }}"
+
+    - name: is nginx running
+      ansible.builtin.meta: end_play
+      when: nginx_result.enabled is false
+    
+  ### Thisis a role of roles, as 'backend' will call other roles  
+  roles:
+    - nginx_cert_update  
+  ### Thisis a role of roles, as 'backend' will call other roles  
+
+  tasks:
+    
+  post_tasks:
+    - name: Display completion message
+      debug:
+        msg:
+          - "=========================================="
+          - "Nginx update complete!"
+          - "=========================================="
+          - "Services installed:"
+          - "  - certbot"
+          - "  - dns settings"
+          - "  - restarted nginx"
+          - "  - new config"
+          - "Next steps:"
+          - "  1. Set and test nginx on the server for SSL keys"
+
+          - "=========================================="

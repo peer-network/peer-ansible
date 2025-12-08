@@ -1,0 +1,103 @@
+
+# ==================================================
+# FILE: roles/postgress/tasks/main.yml
+#
+# For daatabase config
+# ==================================================
+
+---
+## Find version of postgres to setup paths
+- name: Find PostgreSQL version
+  shell: ls /etc/postgresql/ | head -1
+  register: pg_version
+  changed_when: false
+
+- name: Set PostgreSQL configuration paths
+  set_fact:
+    pg_version_num: "{{ pg_version.stdout }}"
+    pg_data_dir: "/etc/postgresql/{{ pg_version.stdout }}/main"
+    pg_conf: "/etc/postgresql/{{ pg_version.stdout }}/main/postgresql.conf"
+    pg_hba: "/etc/postgresql/{{ pg_version.stdout }}/main/pg_hba.conf"
+    
+- name: Backup postgresql.conf
+  copy:
+    src: "{{ pg_conf }}"
+    dest: "{{ pg_conf }}.backup.{{ ansible_date_time.epoch }}"
+    remote_src: yes
+    force: no
+
+- name: Configure PostgreSQL to listen on network
+  lineinfile:
+    path: "{{ pg_conf }}"
+    regexp: '^#?listen_addresses'
+    line: "listen_addresses = 'localhost,{{ Internal_Database }}'"
+    backup: yes
+  notify: Restart PostgreSQL
+
+- name: Configure PostgreSQL port
+  lineinfile:
+    path: "{{ pg_conf }}"
+    regexp: '^#?port'
+    line: "port = {{ psql_port }}"
+    backup: yes
+  notify: Restart PostgreSQL
+
+- name: Configure max_connections
+  lineinfile:
+    path: "{{ pg_conf }}"
+    regexp: '^#?max_connections'
+    line: "max_connections = 300"
+    backup: yes
+  notify: Restart PostgreSQL
+
+# === STEP 2: CONFIGURE PG_HBA.CONF ===
+- name: Backup pg_hba.conf
+  copy:
+    src: "{{ pg_hba }}"
+    dest: "{{ pg_hba }}.backup.{{ ansible_date_time.epoch }}"
+    remote_src: yes
+    force: no
+
+- name: Configure pg_hba.conf for authentication
+  blockinfile:
+    path: "{{ pg_hba }}"
+    marker: "# {mark} ANSIBLE MANAGED AUTHENTICATION"
+    insertafter: "^# TYPE"
+    block: |
+      # Local socket connections
+      local   all             postgres                                peer
+      local   all             all                                     md5
+      
+      # IPv4 local connections
+      host    all             all             127.0.0.1/32            md5
+      host    all             all             ::1/128                 md5
+      
+      # Backend server access
+      host    {{ database_name }}    {{ database_user }}       {{ Internal_Backend }}/32    md5
+      
+      # Local network access (192.168.1.0/24)
+      host    {{ database_name }}    {{ database_user }}       192.168.1.0/24               md5
+      
+      # Master user access from backend
+      host    all             postgres                         {{ Internal_Backend }}/32    md5
+      host    all             postgres                         192.168.1.0/24               md5
+  notify: Reload PostgreSQL
+
+# === STEP 3: SET MASTER PASSWORD ===
+- name: Flush handlers to reload PostgreSQL config
+  meta: flush_handlers
+
+- name: Wait for PostgreSQL to be ready
+  wait_for:
+    port: "{{ psql_port }}"
+    delay: 2
+    timeout: 30
+
+- name: Set postgres (master) user password
+  become_user: postgres
+  postgresql_user:
+    name: postgres
+    password: "{{ prod_root }}"
+    role_attr_flags: SUPERUSER,CREATEDB,CREATEROLE,REPLICATION
+    login_unix_socket: /var/run/postgresql
+  no_log: true

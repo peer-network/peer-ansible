@@ -9,6 +9,7 @@
     path: /etc/php/8.3/fpm/pool.d/www.conf
     append_newline: true
     prepend_newline: true
+    marker: "; {mark} ANSIBLE MANAGED BLOCK" 
     block: |
       pm = dynamic
       pm.max_children = 300
@@ -42,9 +43,10 @@
 ##  Last file, restart php
 - name: Edit php-ini file
   ansible.builtin.blockinfile:
-    path: etc/php/8.3/fpm/php.ini
+    path: /etc/php/8.3/fpm/php.ini
     append_newline: true
     prepend_newline: true
+    marker: "; {mark} ANSIBLE MANAGED BLOCK" 
     block: |
       zend_extension=opcache
       opcache.enable=1
@@ -55,7 +57,17 @@
       ; Enable JIT Compilation (PHP 8+)
       opcache.jit=1255
       opcache.jit_buffer_size=128M
-    notify: Restart PHP-FPM
+
+- name: set files for PHP restart
+  debug: 
+    msg:
+    - "completed update for:"
+    - "/etc/php/8.3/fpm/pool.d/www.conf"
+    - "/etc/php/8.3/mods-available/opcache.ini"
+    - "/etc/php/8.3/fpm/php.ini"
+    - "Restarting PHP-FPM"
+  changed_when: true
+  notify: Restart PHP-FPM
 
 
 

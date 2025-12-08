@@ -1,0 +1,54 @@
+# ==================================================
+# FILE: roles/nginx/tasks/main.yml
+# Installing Nginx:  Setup Nginx configuration
+# Matches: cp ./docker/nginx/default.conf ... && systemctl restart
+# ==================================================
+---
+- name: Display update nginx setup message
+  debug:
+    msg: "Adding SSL keys to web-facing servers (vm)"
+
+- name: Copy the defaults with the hostname-DNS doain to nginx.conf 
+  ansible.builtin.template:
+    src: peerapp_server_config.j2
+    dest: /etc/nginx/sites-available/peerapp
+    mode: '0644'
+  notify: Restart Nginx
+
+- name: Display peerapp contents
+  command: cat /etc/nginx/sites-available/peerapp chdir=/etc
+  register: peearapp_output
+
+- name: print out the peerapp file
+  debug:
+    msg: "{{ peearapp_output.stdout }}"
+  when: nginx_debug is true
+
+- name: "install certbot for domains {{ ansible_host['domains'] }}"
+  ansible.builtin.apt:
+    name: 
+      - certbot 
+      - python3-certbot-nginx
+    state: present
+
+- name: Certbot run
+  ansible.builtin.command:
+    argv:
+      - certbot 
+      - --nginx 
+      - -d peerapp.eu 
+      - -d www.peerapp.eu 
+      - -d media.peerapp.eu
+  become: yes
+  register: certbot_output
+
+- name: "certbot {{ ansible_host }}" 
+  debug:
+    msg: "output from certbot {{ certbot_output }}" 
+
+- name: Copy the defaults with the hostname-DNS doain to nginx.conf 
+  ansible.builtin.template:
+    src: peerapp_server_config.j2
+    dest: /etc/nginx/sites-available/peerapp
+    mode: '0644'
+  notify: Restart Nginx

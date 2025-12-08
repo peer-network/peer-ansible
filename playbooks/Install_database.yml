@@ -13,46 +13,65 @@
 
   vars:
     database_name: "peer"
-    database_user: "peer_prod" 
-    path_to_file_on_host: '/etc/postgres-common/passcode'
-    # You can override these in your inventory
-    Internal_IP_target: "192.168.1.210"  # database IP 
-    Internal_Backend: "192.168.1.200"
-    External_IP_target: "162.19.169.215"  # Host IP
+    database_user: "peer"
+    database_unlock_key: '/home/peer/ansible/.passcode'
+  
+
+    # Network configuration
+
+    ### defined in /group_vars/all.yml
+    Internal_Gateway: "192.168.1.1"
+    External_Host: "162.19.169.215" # Host IP
+
+    Internal_Database: "{{ hostvars['peer-prod-database']['ansible_host'] }}"
+    Internal_Backend: "{{ hostvars['peer-prod-backend']['ansible_host'] }}"
+    Internal_Bastion: "{{ hostvars['peer-prod-bastion']['ansible_host'] }}"
+    Internal_Website: "{{ hostvars['peer-prod-website']['ansible_host'] }}"
+    Internal_Frontend: "{{ hostvars['peer-prod-frontend']['ansible_host'] }}"
+    internal_Admin: "{{ hostvars['peer-prod-admin']['ansible_host'] }}"
+
     psql_port: 5432
+
+    postgres_peer_beta_password: "{{ prod_peer_beta }}"
+    database_credintials: "/home/peer/peer-ansible/host_vars/peer-prod-database.yml"
+
+    # Firewall configuration
+    configure_firewall: true
     php_max_execution_time: "3600"
 
-  
+    # Database configuration
+    database_password: "{{ prod_root }}"
+    # SQL files to import (update these paths!)
+    sql_structure_file: "/home/peer/db_files/structure.sql"
+    sql_optional_data_file: "/home/peer/db_files/optional_data.sql"
+
 ### Make or use password for the postgres database
 ##  
   pre_tasks:
 
-  - name: BLOCK- Chcek files for the database
-    when: (peer_prod_db_stat.stdout not defined or  eer_prod_pass_stat.stdout not defined)
+  #  The vars are in the host-vault for the database
+  - name: Check for peer-prod-database
+    ansible.builtin.stat:
+      path: "{{ database_credintials }}"
+    register: peer_prod_db_stat
+    delegate_to: 127.0.0.1
+
+  - name: Check for '.passcode'
+    ansible.builtin.stat:
+      path: "{{ database_unlock_key }}"
+    register: peer_prod_pass_stat
+    delegate_to: 127.0.0.1
+
+  - name: BLOCK — Check files for the database
+    when: not peer_prod_db_stat.stat.exists or not peer_prod_pass_stat.stat.exists
     block:
-      - name: Check for vars_files
-        ansible.builtin.stat:
-        path: ../host_vars/peer-prod-database.yml
-        register: peer_prod_db_stat
-
-      - name: Check for vars_files
-        ansible.builtin.stat:
-        path: ../.passcode
-        register: peer_prod_pass_stat
-
-      - name: "end play if peer_prod_database.yml not found"
-        debug:
-          msg: 
-            - "Ending play: peer_prod_database.yml is not at ../host_vars/peer-prod-database.yml"
-            - "         Or: .passcode file is missing.  Plase check if these files are present."
-      # rescue and always can be placed here
-      - meta: end_play
-
-
-
-  - name: Print a debug message
-    ansible.builtin.debug:
-      msg: "stat for database {{ peer_prod_db_stat }}"
+      - name: Fail if required files are missing
+        ansible.builtin.fail:
+          msg: >
+            Missing one or more required files:
+            {{ 'peer-prod-database.yml' if not peer_prod_db_stat.stat.exists else '' }}
+            {{ '.passcode' if not peer_prod_pass_stat.stat.exists else '' }}
+      - ansible.builtin.meta: end_play
 
   ### Thisis a role of roles, as 'backend' will call other roles  
   roles:
