@@ -33,7 +33,7 @@ regexes = [
   '''inventory_hostname''',
   '''playbook_path''',
   '''group_names''',
-  '''hostvars\[.*\]'''
+  '''hostvars\[.*\]''',
   '''TOKEN="your-token-here"'''
 ]
 
