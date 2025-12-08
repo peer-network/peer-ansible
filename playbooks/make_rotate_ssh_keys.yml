@@ -1,0 +1,49 @@
+# ==================================================
+# FILE: playbooks/make_rotate_ssh_keys.yml
+# Playbook to add gererated ssh keys to the vms
+# ==================================================
+---
+
+- name: Add ssh keys to all vm for acces
+  hosts: all
+  gather_facts: yes
+  become: yes
+  
+  vars:
+    # You can override these in your inventory
+    # The passcode is testing_peer_beta
+    #  ssh-bit-size: 
+      ssh-type: "ssh-ed25519" 
+    
+  pre_tasks:
+
+  - name: Test on bastion
+    when: ansible_host is 'peer-prod-bastion'
+    block:
+        - name: is community.crypto.openssh_keypair there?
+          ansible.builtin.shell: ansible-galaxy collection list
+          register: galaxy_collection
+
+        - name: is crypto there, if not end_play
+          ansible.builtin.meta: end_play
+          when: "'community.crypto' not in galaxy_collection.stdout_lines"
+
+        - name: Generate an OpenSSH keypair with a different algorithm (dsa)
+          community.crypto.openssh_keypair:
+            path: tmp/bastion_ed25519
+            type: ed25519
+            passphrase: "{{ testing_peer_beta }}"
+    ### Ende
+
+  tasks:
+    - name: checking {{ ansible_host }} for ssh-file
+      ansible.builtin.find:
+        paths: bastion_ed25519
+      register: is_here
+        # patterns: "^.*?\\.(?:old|log\\.gz)$"
+        # size: 10m
+        # use_regex: yes
+
+    - name: what is the nginx_result  
+      ansible.builtin.debug: "{{ is_here }}" 
+
