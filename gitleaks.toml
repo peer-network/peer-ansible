@@ -34,7 +34,8 @@ regexes = [
   '''playbook_path''',
   '''group_names''',
   '''hostvars\[.*\]''',
-  '''[+\-]?\s*TOKEN\s*=\s*["']your-token-here["']'''
+  '''(?i)[+\-]?\s*token\s*=\s*["']your-[a-z0-9_-]+-here["']''',
+  '''TOKEN=\"your-proxmoxtoken-here\"'''
 ]
 
 [pathDenylist]
