@@ -13,7 +13,7 @@
     # You can override these in your inventory
     # The passcode is testing_peer_beta
     #  ssh-bit-size: 
-      ssh-type: "ssh-ed25519" 
+    ssh-type: "ed25519" 
     
   pre_tasks:
 
@@ -31,7 +31,7 @@
         - name: Generate an OpenSSH keypair with a different algorithm (dsa)
           community.crypto.openssh_keypair:
             path: tmp/bastion_ed25519
-            type: ed25519
+            type: "{{ ssh-type }}"
             passphrase: "{{ testing_peer_beta }}"
     ### Ende
 
