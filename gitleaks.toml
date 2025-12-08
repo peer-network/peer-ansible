@@ -34,7 +34,7 @@ regexes = [
   '''playbook_path''',
   '''group_names''',
   '''hostvars\[.*\]''',
-  '''TOKEN="your-token-here"'''
+  '''[+\-]?\s*TOKEN\s*=\s*["']your-token-here["']'''
 ]
 
 [pathDenylist]
