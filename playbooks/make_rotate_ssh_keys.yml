@@ -11,6 +11,7 @@
   
   vars:
     ssh_type: "ed25519" 
+    ssh_key_dir: /hoem/peer/.ssh
     # You can override these in your inventory
     # The passcode is testing_peer_beta
     #  ssh-bit-size: 
@@ -40,14 +41,21 @@
   tasks:
     - name: checking {{ ansible_host }} for ssh-file
       ansible.builtin.find:
-        paths: /home/peer/.ssh/bastion_ed25519
+        paths: /home/peer/.ssh
+        patterns: 'bastion_ed25519'
+        file_type: file
       become: yes
       register: is_here
 
     - name: what is the ssh bastion result  
       ansible.builtin.debug: 
         msg: 
-          - "Result {{ is_here }}" 
+          - "Result {{ is_here.stdout_lines }}" 
+
+    - name: is crypto there, if not end_play
+      ansible.builtin.meta: end_play
+      when: is_here.stdout_lines < 1
+
 
     - name: Set authorized key taken from file
       ansible.posix.authorized_key:
