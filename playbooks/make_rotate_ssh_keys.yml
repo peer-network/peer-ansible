@@ -44,8 +44,10 @@
         paths: /home/peer/.ssh/bastion_ed25519
       register: is_here
 
-    - name: what is the nginx_result  
-      ansible.builtin.debug: "{{ is_here }}" 
+    - name: what is the ssh bastion result  
+      ansible.builtin.debug: 
+        msg: 
+          - "Result {{ is_here }}" 
 
     - name: Set authorized key taken from file
       ansible.posix.authorized_key:
