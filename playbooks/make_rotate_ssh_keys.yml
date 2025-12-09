@@ -16,7 +16,7 @@
     #  ssh-bit-size: 
 
   vars_files:
-    - /home/peer/ansible/peer-ansible/host_vars/peer-prod-database.yml
+    - /home/peer/ansible/host_vars/peer-prod-database.yml
 
   pre_tasks:
   - name: Test on bastion
