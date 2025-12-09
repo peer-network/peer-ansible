@@ -48,7 +48,7 @@
         - name: what is the ssh bastion result  
           ansible.builtin.debug: 
             msg: 
-              - "Result {{ is_here.files[path] }}" 
+              - "Result {{ is_here.file[].path }}" 
 
         - name: Is the main key found?
           ansible.builtin.meta: end_play
