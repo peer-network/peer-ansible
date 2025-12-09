@@ -21,7 +21,7 @@
 
   pre_tasks:
   - name: Test on bastion
-    when: "'peer-prod-bastion' in host"
+    when: "'peer-prod-bastion' in inventory_hostname"
     block:
         - name: is community.crypto.openssh_keypair there?
           ansible.builtin.shell: ansible-galaxy collection list
