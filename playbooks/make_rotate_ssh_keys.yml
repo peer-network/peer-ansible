@@ -21,7 +21,7 @@
 
   pre_tasks:
   - name: Test on bastion
-    when: " '192.168.1.10' in ansible_host"
+    when: "'peer-prod-bastion' in host"
     block:
         - name: is community.crypto.openssh_keypair there?
           ansible.builtin.shell: ansible-galaxy collection list
@@ -48,6 +48,7 @@
         - name: what is the ssh bastion result  
           ansible.builtin.debug: 
             msg: 
+            ### Important to use files[0] as there can be more then one
               - "Result {{ is_here.files[0].path }}" 
 
         - name: Is the main key found?
