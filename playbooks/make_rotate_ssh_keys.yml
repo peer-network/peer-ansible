@@ -32,7 +32,7 @@
 
         - name: Generate an OpenSSH keypair with a different algorithm (dsa)
           community.crypto.openssh_keypair:
-            path: /tmp/bastion_ed25519
+            path: /home/peer/.ssh/bastion_ed25519
             type: "{{ ssh_type }}"
             passphrase: "{{ testing_peer_beta }}"
             
@@ -41,12 +41,19 @@
   tasks:
     - name: checking {{ ansible_host }} for ssh-file
       ansible.builtin.find:
-        paths: bastion_ed25519
+        paths: /home/peer/.ssh/bastion_ed25519
       register: is_here
-        # patterns: "^.*?\\.(?:old|log\\.gz)$"
-        # size: 10m
-        # use_regex: yes
 
     - name: what is the nginx_result  
       ansible.builtin.debug: "{{ is_here }}" 
+
+    - name: Set authorized key taken from file
+      ansible.posix.authorized_key:
+        user: peer
+        state: present
+        key: "{{ lookup('file', '/home/peer/.ssh/bastion_ed25519.pub') }}"
+    
+
+
+
 
