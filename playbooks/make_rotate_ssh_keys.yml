@@ -35,13 +35,13 @@
             path: /home/peer/.ssh/bastion_ed25519
             type: "{{ ssh_type }}"
             passphrase: "{{ testing_peer_beta }}"
-            
     ### Ende
 
   tasks:
     - name: checking {{ ansible_host }} for ssh-file
       ansible.builtin.find:
         paths: /home/peer/.ssh/bastion_ed25519
+      become: yes
       register: is_here
 
     - name: what is the ssh bastion result  
@@ -54,6 +54,8 @@
         user: peer
         state: present
         key: "{{ lookup('file', '/home/peer/.ssh/bastion_ed25519.pub') }}"
+      become: yes
+
     
 
 
