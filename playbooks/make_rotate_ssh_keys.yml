@@ -35,6 +35,7 @@
             path: tmp/bastion_ed25519
             type: "{{ ssh_type }}"
             passphrase: "{{ testing_peer_beta }}"
+            present: yes
     ### Ende
 
   tasks:
