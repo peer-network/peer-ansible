@@ -32,10 +32,10 @@
 
         - name: Generate an OpenSSH keypair with a different algorithm (dsa)
           community.crypto.openssh_keypair:
-            path: tmp/bastion_ed25519
+            path: /tmp/bastion_ed25519
             type: "{{ ssh_type }}"
             passphrase: "{{ testing_peer_beta }}"
-            present: yes
+            
     ### Ende
 
   tasks:
