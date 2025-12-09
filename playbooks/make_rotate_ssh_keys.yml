@@ -18,7 +18,7 @@
 
   pre_tasks:
   - name: Test on bastion
-    when: ansible_host is 'peer-prod-bastion'
+    when: " '192.168.1.10' in ansible_host"
     block:
         - name: is community.crypto.openssh_keypair there?
           ansible.builtin.shell: ansible-galaxy collection list
