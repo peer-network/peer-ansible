@@ -62,6 +62,7 @@
             dest: /etc/hosts.backup.{{ ansible_date_time.iso8601_basic_short }}
             remote_src: yes
       when: backup_enabled | bool
+      become: yes
     
     - name: Set new hostname using hostnamectl
       command: "hostnamectl set-hostname {{ inventory_hostname }}"
