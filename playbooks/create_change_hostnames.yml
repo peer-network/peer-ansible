@@ -5,13 +5,10 @@
 ---
 
 - name: Add ssh keys to all vm for acces
-  hosts: peer-staging-backend
+  hosts: peer-staging-bastion
   gather_facts: no
   # gather_facts: yes
   become: yes
-  
-
-    # You can override these in your inventory
 
   # vars_files:
   #    - host_vars/peer-prod-database.yml   # use '.passcode' to unlock ^IdLW...
@@ -19,12 +16,11 @@
 
   # playbooks/test_mappings.yml
 
-
   tasks:
     - name: Display environment
       debug:
         msg: 
-          - "Current environment: {{ peer_env }}"
+#          - "Current environment: {{ peer_env }}"
           - "Prefix {{ vm_naming['prefix'] }}"
 
 
