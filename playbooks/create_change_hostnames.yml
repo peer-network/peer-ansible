@@ -5,7 +5,7 @@
 ---
 
 - name: Add ssh keys to all vm for acces
-  hosts: localhost
+  hosts: all
   gather_facts: no
   # gather_facts: yes
   become: yes
@@ -37,13 +37,13 @@
     - name: Display constructed VM names
       debug:
         msg:
-          - "Database host: {{ _database_host }}"
-          - "Backend host: {{ _backend_host }}"
+          - "Database host: {{ database_host }}"
+          - "Backend host: {{ backend_host }}"
           - "Expected pattern: {{ vm_naming.prefix }}-{{ peer_env }}-{service}"
     
     - name: Test hostvars lookup
       debug:
-        msg: "Database IP from hostvars: {{ hostvars[_database_host]['ansible_host'] | default('NOT FOUND') }}"
+        msg: "Database IP from hostvars: {{ hostvars[database_host]['ansible_host'] | default('NOT FOUND') }}"
       when: _database_host is defined
 
 - name: Test from VM perspective
