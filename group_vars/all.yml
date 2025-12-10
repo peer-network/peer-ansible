@@ -21,13 +21,6 @@ service_names:
   database: "database"
 
 
-# Internal_Database: "{{ hostvars['peer-prod-database']['ansible_host'] }}"
-# Internal_Backend: "{{ hostvars['peer-prod-backend']['ansible_host'] }}"
-# Internal_Bastion: "{{ hostvars['peer-prod-bastion']['ansible_host'] }}"
-# Internal_Website: "{{ hostvars['peer-prod-website']['ansible_host'] }}"
-# Internal_Frontend: "{{ hostvars['peer-prod-frontend']['ansible_host'] }}"
-# internal_Admin: "{{ hostvars['peer-prod-admin']['ansible_host'] }}"
-
 # Dynamic Internal IP mappings - these will resolve based on peer_env
 # Or get the IP directly from the group
 Internal_Database: "{{ hostvars[groups['database'][0]]['ansible_host'] | default('') }}"

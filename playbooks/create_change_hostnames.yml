@@ -22,17 +22,17 @@
   tasks:
     - name: Display environment
       debug:
-        msg: "Current environment: {{ vars.peer_env }}"
+        msg: "Current environment: {{ peer_env }}"
     
     - name: Display all Internal mappings
       debug:
         msg:
-          - "Internal_Database: {{ vars.Internal_Database }}"
-          - "Internal_Backend: {{ vars.Internal_Backend }}"
-          - "Internal_Bastion: {{ vars.Internal_Bastion }}"
-          - "Internal_Website: {{ vars.Internal_Website }}"
-          - "Internal_Frontend: {{ vars.Internal_Frontend }}"
-          - "Internal_Admin: {{ vars.Internal_Admin }}"
+          - "Internal_Database: {{ Internal_Database }}"
+          - "Internal_Backend: {{ Internal_Backend }}"
+          - "Internal_Bastion: {{ Internal_Bastion }}"
+          - "Internal_Website: {{ Internal_Website }}"
+          - "Internal_Frontend: {{ Internal_Frontend }}"
+          - "Internal_Admin: {{ Internal_Admin }}"
     
     - name: Display constructed VM names
       debug:
@@ -56,6 +56,6 @@
         msg:
           - "I am: {{ inventory_hostname }}"
           - "My service: {{ service_name | default('unknown') }}"
-          - "I see Internal_Backend as: {{ vars.Internal_Backend }}"
-          - "I see Internal_Database as: {{ vars.Internal_Database }}"
+          - "I see Internal_Backend as: {{ Internal_Backend }}"
+          - "I see Internal_Database as: {{ Internal_Database }}"
       run_once: no
