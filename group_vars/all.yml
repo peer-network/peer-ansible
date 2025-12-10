@@ -9,7 +9,7 @@ vm_naming:
   pattern: "{{ vm_naming.prefix }}-{{ environment }}-{{ service_name }}"
 
 # Default environment (override in inventory per host/group)
-peer_env: "staging"
+# peer_env: "staging"
 
 # Service name mappings (keeps inventory cleaner)
 service_names:
