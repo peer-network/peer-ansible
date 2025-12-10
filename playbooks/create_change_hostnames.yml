@@ -22,7 +22,7 @@
   tasks:
     - name: Display environment
       debug:
-        msg: "Current environment: {{ peer_env }}"
+        msg: "Current environment: {{ alll.vars.peer_env }}"
     
     - name: Display all Internal mappings
       debug:
