@@ -3,7 +3,7 @@ title = "Peer Ansible Gitleaks Config"
 [[rules]]
 id = "infra-catch-common-secrets"
 description = "Catch common infrastructure secrets (Terraform, Ansible, Grafana, SSH, API keys)"
-regex = '''(?i)(ghp_[0-9A-Za-z]{36}|github_pat_[0-9A-Za-z_]{20,}|glpat-[0-9A-Za-z\-_]{20}|AKIA[0-9A-Z]{16}|ASIA[0-9A-Z]{16}|[A-Za-z0-9]{20,}:[A-Za-z0-9+/]{40,}|eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+\.[A-Za-z0-9._-]+|-----BEGIN( RSA| DSA| EC| OPENSSH)? PRIVATE KEY-----|token\s*=\s*["'][A-Za-z0-9_\-]{10,}["']|password\s*=\s*["'][^"']{6,}["'])'''
+regex = '''(?i)(ghp_[0-9A-Za-z]{36}|github_pat_[0-9A-Za-z_]{20,}|glpat-[0-9A-Za-z\-_]{20}|AKIA[0-9A-Z]{16}|ASIA[0-9A-Z]{16}|[A-Za-z0-9]{20,}:[A-Za-z0-9+/]{40,}|eyJ[A-Za-z0-9_-]+\.[A-Za-z0-9._-]+\.[A-Za-z0-9._-]+|-----BEGIN( RSA| DSA| EC| OPENSSH)? PRIVATE KEY-----|token\s*=\s*["'][A-Za-z0-9_\-]{24,}["']|password\s*=\s*["'][^"']{6,}["'])'''
 tags = ["key", "secret", "ansible", "infrastructure"]
 
 [[rules]]
@@ -24,18 +24,6 @@ description = "Catch potential provider secrets in Terraform (.tf) files"
 regex = '''(?i)(access[_-]?key\s*=\s*["'][A-Za-z0-9/+=]{16,}["']|secret[_-]?key\s*=\s*["'][A-Za-z0-9/+=]{32,}["']|client[_-]?secret\s*=\s*["'][A-Za-z0-9/+=]{20,}["'])'''
 tags = ["terraform", "provider", "key"]
 
-[rules.allowlist]
-description = "Ignore Ansible templating syntax and variables"
-regexes = [
-  '''{{.*}}''',
-  '''ansible_[a-z_]+''',
-  '''vars\.[a-z_]+''',
-  '''inventory_hostname''',
-  '''playbook_path''',
-  '''group_names''',
-  '''hostvars\[.*\]'''
-]
-
 [pathDenylist]
 description = "Exclude irrelevant or generated files"
 regexes = [
@@ -52,4 +40,17 @@ regexes = [
   '''^logs?/.*''',
   '''^tmp/.*''',
   '''^\.env.*$'''
+]
+
+[allowlist]
+description = "Ignore Ansible templating syntax and variables"
+regexes = [
+  '''{{.*}}''',
+  '''ansible_[a-z_]+''',
+  '''vars\.[a-z_]+''',
+  '''inventory_hostname''',
+  '''playbook_path''',
+  '''group_names''',
+  '''hostvars\[.*\]''',
+  '''(?i)[+\-]?\s*token\s*=\s*\\"your-[a-z0-9_-]+-here\\"'''
 ]

@@ -1,0 +1,45 @@
+# ==================================================
+# FILE: Host install and config nginx for proxy.yml
+# Playbook to install and setup nginx as a proxy
+##
+# Run only from outside of teh 
+# ==================================================
+---
+
+- name: Update host nginx configs for reverse proxy 
+  hosts: proxmox_host  # The host itself
+  become: yes
+  
+  roles:
+    - nginx
+
+  vars:
+    nginx_debug: true
+  
+  tasks:
+    - name: Remove default nginx site
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+
+    - name: Create nginx config for reverse proxy
+      template:
+        src: templates/nginx-reverse-proxy.conf.j2
+        dest: /etc/nginx/sites-available/reverse-proxy.conf
+
+    - name: Enable reverse proxy site
+      file:
+        src: /etc/nginx/sites-available/reverse-proxy.conf
+        dest: /etc/nginx/sites-enabled/reverse-proxy.conf
+        state: link
+
+    - name: Test nginx configuration
+      command: nginx -t
+      register: nginx_test
+      changed_when: false
+
+    - name: Reload nginx
+      systemd:
+        name: nginx
+        state: reloaded
+      when: nginx_test.rc == 0

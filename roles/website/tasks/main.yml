@@ -1,0 +1,23 @@
+# ==================================================
+# FILE: roles/website/tasks/main.yml
+# Installing Website:  Setup for Apache2 configuration
+# ==================================================
+---
+- name: "Installing Apache2:  Ensure Apache2 pre_tasks are complete"
+  debug:
+    msg: "Check for common role completion"
+
+- name: Stop Nginx service
+  ansible.builtin.service:
+    name: nginx
+    state: stopped
+
+- name: Disable Nginx service (optional)
+  ansible.builtin.systemd:
+    name: nginx
+    enabled: no
+    masked: yes
+
+- name: Install Apache2
+  ansible.builtin.include_role:
+    name: apache2
