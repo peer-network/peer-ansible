@@ -15,6 +15,7 @@
 
   vars_files:
     - /home/peer/ansible/host_vars/peer-prod-database.yml   # use '.passcode' to unlock ^IdLW...
+    - /home/peer/ansible/peer-ansible/group_vars/all.yml
 
   # playbooks/test_mappings.yml
 
