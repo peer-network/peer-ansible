@@ -19,12 +19,22 @@
 
   # playbooks/test_mappings.yml
 
-  
+
   tasks:
     - name: Display environment
       debug:
         msg: "Current environment: {{ peer_env }}"
-    
+
+    - name: base names
+      debug:
+        msg:
+          - "frontend: {{ frontend }}"
+          - "backend: {{ backend }}"
+          - "website: {{ website }}"
+          - "bastion: {{ bastion }}"
+          - "admin: {{ admin_alloy }}"
+          - "database: {{ database }}"
+
     - name: Display all Internal mappings
       debug:
         msg:
