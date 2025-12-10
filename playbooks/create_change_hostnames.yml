@@ -13,9 +13,9 @@
 
     # You can override these in your inventory
 
-  vars_files:
-     - host_vars/peer-prod-database.yml   # use '.passcode' to unlock ^IdLW...
-     - group_vars/all.yml
+  # vars_files:
+  #    - host_vars/peer-prod-database.yml   # use '.passcode' to unlock ^IdLW...
+  #    - group_vars/all.yml
 
   # playbooks/test_mappings.yml
 
@@ -70,4 +70,3 @@
           - "My service: {{ service_name | default('unknown') }}"
           - "I see Internal_Backend as: {{ Internal_Backend }}"
           - "I see Internal_Database as: {{ Internal_Database }}"
-      run_once: no

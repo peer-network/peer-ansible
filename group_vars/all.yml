@@ -4,14 +4,14 @@
 Internal_Gateway: "192.168.1.1"
 External_Host: "162.19.169.215" # Host IP
 
-vm_naming:
+vm_naming:    # vm_naming['prefix'] vm_naming['pattern'] or vm_naming.prefix 
   prefix: "peer"
   pattern: "{{ vm_naming.prefix }}-{{ environment }}-{{ service_name }}"
 
 # Default environment (override in inventory per host/group)
 # peer_env: "staging"
 
-# Service name mappings (keeps inventory cleaner)
+# Service name mappings (keeps inventory cleaner) service_names['frontend']
 service_names:
   frontend: "frontend"
   backend: "backend"
