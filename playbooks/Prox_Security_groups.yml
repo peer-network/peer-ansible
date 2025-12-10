@@ -121,7 +121,7 @@
           PROXMOX_TOKEN environment variable is not set!
           
           Please configure API access:
-          export PROXMOX_TOKEN="your-token-here"
+          export PROXMOX_TOKEN="your-proxmoxtoken-here"
           
           Or use Ansible Vault. See PROXMOX_API_SETUP.md for details.
       when: proxmox_api_token is not defined or proxmox_api_token == ""
