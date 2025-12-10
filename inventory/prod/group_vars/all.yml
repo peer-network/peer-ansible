@@ -1,0 +1,31 @@
+### Vars for all of Peer
+##
+---
+Internal_Gateway: "192.168.1.1"
+External_Host: "162.19.169.215" # Host IP
+
+vm_naming:
+  prefix: "peer"
+  pattern: "{{ vm_naming.prefix }}-{{ environment }}-{{ service_name }}"
+
+# Default environment (override in inventory per host/group)
+# peer_env: "staging"
+
+# Service name mappings (keeps inventory cleaner)
+service_names:
+  frontend: "frontend"
+  backend: "backend"
+  website: "website"
+  bastion: "bastion"
+  admin: "admin_alloy"
+  database: "database"
+
+
+# Dynamic Internal IP mappings - these will resolve based on peer_env
+# Or get the IP directly from the group
+Internal_Database: "{{ hostvars[groups['database'][0]]['ansible_host'] | default('') }}"
+Internal_Backend: "{{ hostvars[groups['backend'][0]]['ansible_host'] | default('') }}"
+Internal_Bastion: "{{ hostvars[groups['bastion'][0]]['ansible_host'] | default('') }}"
+Internal_Website: "{{ hostvars[groups['website'][0]]['ansible_host'] | default('') }}"
+Internal_Frontend: "{{ hostvars[groups['frontend'][0]]['ansible_host'] | default('') }}"
+Internal_Admin: "{{ hostvars[groups['admin'][0]]['ansible_host'] | default('') }}"
