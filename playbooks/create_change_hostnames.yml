@@ -5,7 +5,7 @@
 ---
 
 - name: Add ssh keys to all vm for acces
-  hosts: bastion
+  hosts: peer-staging-bastion
   gather_facts: no
   # gather_facts: yes
   become: yes
