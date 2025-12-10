@@ -17,7 +17,7 @@
     #  ssh-bit-size: 
 
   vars_files:
-    - /home/peer/ansible/host_vars/peer-prod-database.yml
+    - /home/peer/ansible/host_vars/peer-prod-database.yml   # use '.passcode' to unlock ^IdLW...
 
   pre_tasks:
   - name: Test on bastion
@@ -33,14 +33,14 @@
 
         - name: Generate an OpenSSH keypair with a different algorithm (dsa)
           community.crypto.openssh_keypair:
-            path: /home/peer/.ssh/bastion_ed25519
+            path: /home/peer/.ssh/bastion_ed25519   # for future add timestamp to name
             type: "{{ ssh_type }}"
             passphrase: "{{ testing_peer_beta }}"
 
         - name: checking {{ ansible_host }} for ssh-file
           ansible.builtin.find:
             paths: /home/peer/.ssh
-            patterns: 'bastion_ed25519'
+            patterns: 'bastion_ed25519' 
             file_type: file
           become: yes
           register: is_here
