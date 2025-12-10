@@ -25,7 +25,7 @@
       debug:
         msg: 
           - "Current environment: {{ peer_env }}"
-          - "Prefix {{ vm_naming.prefix }}"
+          - "Prefix {{ vm_naming['prefix'] }}"
 
 
     - name: base names
