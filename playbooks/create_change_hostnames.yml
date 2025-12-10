@@ -23,7 +23,8 @@
   tasks:
     - name: Display environment
       debug:
-        msg: "Current environment: {{ peer_env }}"
+        msg: "Current environment: {{ peer_env }} and prefix {{ vm_naming.prefix }}"
+
 
     - name: base names
       debug:
