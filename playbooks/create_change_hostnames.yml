@@ -10,12 +10,12 @@
   # gather_facts: yes
   become: yes
   
-  vars:
+
     # You can override these in your inventory
 
-  vars_files:
-    - host_vars/peer-prod-database.yml   # use '.passcode' to unlock ^IdLW...
-    - group_vars/all.yml
+  # vars_files:
+  #   - host_vars/peer-prod-database.yml   # use '.passcode' to unlock ^IdLW...
+  #   - group_vars/all.yml
 
   # playbooks/test_mappings.yml
 
