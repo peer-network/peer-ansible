@@ -6,7 +6,7 @@ External_Host: "162.19.169.215" # Host IP
 
 vm_naming:    # vm_naming['prefix'] vm_naming['pattern'] or vm_naming.prefix 
   prefix: "peer"
-  pattern: "{{ prefix }}-{{ environment }}-{{ service_name }}"
+  pattern: "{{ vm_naming.prefix }}-{{ peer_env }}-{{ service_name }}"
 
 # Default environment (override in inventory per host/group)
 # peer_env: "staging"
