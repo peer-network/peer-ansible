@@ -1,0 +1,153 @@
+# ==================================================
+# FILE: playbooks/change_hostname.yml
+# Playbook change vm to set inventory 
+# ==================================================
+
+---
+- name: Verify hostname changes needed
+  hosts: all
+  gather_facts: yes
+  become: no
+  serial: 1  # Do one at a time to be safe
+  
+  vars:
+    skip_reboot: false  # Set to true if you don't want to reboot
+    backup_enabled: true
+  
+  pre_tasks:
+    - name: Show current vs desired hostnames
+      debug:
+        msg:
+          - "Inventory name: {{ inventory_hostname }}"
+          - "Current hostname: {{ ansible_hostname }}"
+          - "Current FQDN: {{ ansible_fqdn }}"
+          - "Environment: {{ peer_env }}"
+          - "Role: {{ role }}"
+          - "Change needed: {{ inventory_hostname != ansible_hostname }}"
+
+    - name: Verify we're in staging environment
+      assert:
+        that:
+          - peer_env == "staging"
+        fail_msg: "This playbook should only run in staging environment!"
+        success_msg: "Confirmed: Running in {{ peer_env }} environment"
+    
+    - name: Check if hostname change is needed
+      set_fact:
+        hostname_needs_change: "{{ inventory_hostname != ansible_hostname }}"
+    
+    - name: Show what will be changed
+      debug:
+        msg:
+          - "Will change: {{ ansible_hostname }} → {{ inventory_hostname }}"
+          - "Skip reboot: {{ skip_reboot }}"
+      when: hostname_needs_change | bool
+    
+    - name: Skip if no change needed
+      meta: end_host
+      when: not (hostname_needs_change | bool)
+  
+  tasks:
+    - name: Backup current hostname files
+      block:
+        - name: Backup /etc/hostname
+          copy:
+            src: /etc/hostname
+            dest: /etc/hostname.backup.{{ ansible_date_time.iso8601_basic_short }}
+            remote_src: yes
+        
+        - name: Backup /etc/hosts
+          copy:
+            src: /etc/hosts
+            dest: /etc/hosts.backup.{{ ansible_date_time.iso8601_basic_short }}
+            remote_src: yes
+      when: backup_enabled | bool
+    
+    - name: Set new hostname using hostnamectl
+      command: "hostnamectl set-hostname {{ inventory_hostname }}"
+      register: hostname_set
+      changed_when: true
+    
+    - name: Update /etc/hostname
+      copy:
+        content: "{{ inventory_hostname }}\n"
+        dest: /etc/hostname
+        mode: '0644'
+        owner: root
+        group: root
+    
+    - name: Update /etc/hosts - remove old hostname entries
+      lineinfile:
+        path: /etc/hosts
+        regexp: "{{ ansible_hostname }}"
+        state: absent
+      when: ansible_hostname != inventory_hostname
+    
+    - name: Update /etc/hosts - add new hostname
+      lineinfile:
+        path: /etc/hosts
+        regexp: '^127\.0\.1\.1'
+        line: "127.0.1.1 {{ inventory_hostname }} {{ inventory_hostname.split('.')[0] }}"
+        state: present
+    
+    - name: Ensure localhost entries are present
+      lineinfile:
+        path: /etc/hosts
+        line: "{{ item }}"
+        state: present
+      loop:
+        - "127.0.0.1 localhost"
+        - "::1 localhost ip6-localhost ip6-loopback"
+    
+    - name: Verify hostname was set
+      command: hostname
+      register: verify_hostname
+      changed_when: false
+    
+    - name: Display verification result
+      debug:
+        msg:
+          - "Old hostname: {{ ansible_hostname }}"
+          - "New hostname: {{ verify_hostname.stdout }}"
+          - "Expected: {{ inventory_hostname }}"
+          - "Success: {{ verify_hostname.stdout == inventory_hostname }}"
+    
+    - name: Update SSH host keys (optional but recommended)
+      shell: |
+        rm -f /etc/ssh/ssh_host_*
+        dpkg-reconfigure openssh-server
+      when: 
+        - hostname_needs_change | bool
+        - ansible_os_family == "Debian"
+      ignore_errors: yes
+  
+  post_tasks:
+    - name: Reboot to apply changes completely
+      reboot:
+        msg: "Rebooting to apply hostname change from {{ ansible_hostname }} to {{ inventory_hostname }}"
+        reboot_timeout: 300
+        post_reboot_delay: 30
+      when: 
+        - hostname_needs_change | bool
+        - not (skip_reboot | bool)
+    
+    - name: Wait for system to come back
+      wait_for_connection:
+        timeout: 300
+        delay: 10
+      when:
+        - hostname_needs_change | bool
+        - not (skip_reboot | bool)
+    
+    - name: Final verification after reboot
+      setup:
+      when:
+        - hostname_needs_change | bool
+        - not (skip_reboot | bool)
+    
+    - name: Display final hostname
+      debug:
+        msg: "Hostname is now: {{ ansible_hostname }}"
+      when: hostname_needs_change | bool
+
+
