@@ -21,6 +21,7 @@ all:
               ansible_user: peer  # or root if you use root
               ansible_ssh_private_key_file: ~/.ssh/ovh-host
               ansible_port: 22
+              role: Main_Prod_Host
         web_servers:
           hosts:
             peer-prod-website:
