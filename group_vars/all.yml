@@ -30,9 +30,9 @@ service_names:
 
 # Dynamic Internal IP mappings - these will resolve based on peer_env
 # Or get the IP directly from the group
-Internal_Database_IP: "{{ hostvars[groups['database'][0]]['ansible_host'] | default('') }}"
-Internal_Backend_IP: "{{ hostvars[groups['backend'][0]]['ansible_host'] | default('') }}"
-Internal_Bastion_IP: "{{ hostvars[groups['bastion'][0]]['ansible_host'] | default('') }}"
-Internal_Website_IP: "{{ hostvars[groups['website'][0]]['ansible_host'] | default('') }}"
-Internal_Frontend_IP: "{{ hostvars[groups['frontend'][0]]['ansible_host'] | default('') }}"
-Internal_Admin_IP: "{{ hostvars[groups['admin'][0]]['ansible_host'] | default('') }}"
+Internal_Database: "{{ hostvars[groups['database'][0]]['ansible_host'] | default('') }}"
+Internal_Backend: "{{ hostvars[groups['backend'][0]]['ansible_host'] | default('') }}"
+Internal_Bastion: "{{ hostvars[groups['bastion'][0]]['ansible_host'] | default('') }}"
+Internal_Website: "{{ hostvars[groups['website'][0]]['ansible_host'] | default('') }}"
+Internal_Frontend: "{{ hostvars[groups['frontend'][0]]['ansible_host'] | default('') }}"
+Internal_Admin: "{{ hostvars[groups['admin'][0]]['ansible_host'] | default('') }}"
