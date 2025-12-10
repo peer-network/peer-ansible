@@ -4,10 +4,35 @@
 Internal_Gateway: "192.168.1.1"
 External_Host: "162.19.169.215" # Host IP
 
-Internal_Database: "{{ hostvars['peer-prod-database']['ansible_host'] }}"
-Internal_Backend: "{{ hostvars['peer-prod-backend']['ansible_host'] }}"
-Internal_Bastion: "{{ hostvars['peer-prod-bastion']['ansible_host'] }}"
-Internal_Website: "{{ hostvars['peer-prod-website']['ansible_host'] }}"
-Internal_Frontend: "{{ hostvars['peer-prod-frontend']['ansible_host'] }}"
-internal_Admin: "{{ hostvars['peer-prod-admin']['ansible_host'] }}"
+vm_naming:
+  prefix: "peer"
+  pattern: "{{ vm_naming.prefix }}-{{ environment }}-{{ service_name }}"
 
+# Default environment (override in inventory per host/group)
+peer_env: "staging"
+
+# Service name mappings (keeps inventory cleaner)
+service_names:
+  frontend: "frontend"
+  backend: "backend"
+  website: "website"
+  bastion: "bastion"
+  admin: "admin_alloy"
+  database: "database"
+
+
+# Internal_Database: "{{ hostvars['peer-prod-database']['ansible_host'] }}"
+# Internal_Backend: "{{ hostvars['peer-prod-backend']['ansible_host'] }}"
+# Internal_Bastion: "{{ hostvars['peer-prod-bastion']['ansible_host'] }}"
+# Internal_Website: "{{ hostvars['peer-prod-website']['ansible_host'] }}"
+# Internal_Frontend: "{{ hostvars['peer-prod-frontend']['ansible_host'] }}"
+# internal_Admin: "{{ hostvars['peer-prod-admin']['ansible_host'] }}"
+
+# Dynamic Internal IP mappings - these will resolve based on peer_env
+# Or get the IP directly from the group
+Internal_Database_IP: "{{ hostvars[groups['database'][0]]['ansible_host'] | default('') }}"
+Internal_Backend_IP: "{{ hostvars[groups['backend'][0]]['ansible_host'] | default('') }}"
+Internal_Bastion_IP: "{{ hostvars[groups['bastion'][0]]['ansible_host'] | default('') }}"
+Internal_Website_IP: "{{ hostvars[groups['website'][0]]['ansible_host'] | default('') }}"
+Internal_Frontend_IP: "{{ hostvars[groups['frontend'][0]]['ansible_host'] | default('') }}"
+Internal_Admin_IP: "{{ hostvars[groups['admin'][0]]['ansible_host'] | default('') }}"

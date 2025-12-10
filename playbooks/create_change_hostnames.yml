@@ -1,0 +1,61 @@
+# ==================================================
+# FILE: playbooks/make_rotate_ssh_keys.yml
+# Playbook to add gererated ssh keys to the vms
+# ==================================================
+---
+
+- name: Add ssh keys to all vm for acces
+  hosts: localhost
+  gather_facts: no
+  # gather_facts: yes
+  become: yes
+  
+  vars:
+    # You can override these in your inventory
+
+  vars_files:
+    - /home/peer/ansible/host_vars/peer-prod-database.yml   # use '.passcode' to unlock ^IdLW...
+
+  # playbooks/test_mappings.yml
+
+  
+  tasks:
+    - name: Display environment
+      debug:
+        msg: "Current environment: {{ peer_env }}"
+    
+    - name: Display all Internal mappings
+      debug:
+        msg:
+          - "Internal_Database: {{ Internal_Database }}"
+          - "Internal_Backend: {{ Internal_Backend }}"
+          - "Internal_Bastion: {{ Internal_Bastion }}"
+          - "Internal_Website: {{ Internal_Website }}"
+          - "Internal_Frontend: {{ Internal_Frontend }}"
+          - "Internal_Admin: {{ Internal_Admin }}"
+    
+    - name: Display constructed VM names
+      debug:
+        msg:
+          - "Database host: {{ _database_host }}"
+          - "Backend host: {{ _backend_host }}"
+          - "Expected pattern: {{ vm_naming.prefix }}-{{ peer_env }}-{service}"
+    
+    - name: Test hostvars lookup
+      debug:
+        msg: "Database IP from hostvars: {{ hostvars[_database_host]['ansible_host'] | default('NOT FOUND') }}"
+      when: _database_host is defined
+
+- name: Test from VM perspective
+  hosts: all
+  gather_facts: no
+  
+  tasks:
+    - name: Show how each VM sees the Internal_* variables
+      debug:
+        msg:
+          - "I am: {{ inventory_hostname }}"
+          - "My service: {{ service_name | default('unknown') }}"
+          - "I see Internal_Backend as: {{ Internal_Backend }}"
+          - "I see Internal_Database as: {{ Internal_Database }}"
+      run_once: no

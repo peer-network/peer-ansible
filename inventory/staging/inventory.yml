@@ -1,0 +1,108 @@
+# inventory.yml - Ansible inventory for peerapp.eu VMs
+# Corrected version - removed duplicate vars section
+
+all:
+  vars:
+    ansible_user: peer
+    ansible_ssh_private_key_file: ~/.ssh/ovh-host
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+    ansible_python_interpreter: /usr/bin/python3
+    proxmox_host: 162.19.169.215
+
+  children:
+    # Production environment
+    production:
+      children:
+        proxmox:
+          hosts:
+            proxmox_host:
+              ansible_host: 162.19.169.215
+              ansible_user: peer  # or root if you use root
+              ansible_ssh_private_key_file: ~/.ssh/ovh-host
+              ansible_port: 22
+        web_servers:
+          hosts:
+            peer-staging-website:
+              ansible_host: 192.168.1.110
+              vm_id: 106
+              cpu_cores: 1
+              memory_gb: 1
+              disk_gb: 20
+              role: website
+              domains:
+                - peerapp.eu
+                - www.peerapp.eu
+            
+            peer-staging-frontend:
+              ansible_host: 192.168.1.120
+              vm_id: 100
+              cpu_cores: 1
+              memory_gb: 1
+              disk_gb: 20
+              role: frontend
+              domains:
+                - frontend.peerapp.eu
+                - www.frontend.peerapp.eu
+        
+        app_servers:
+          hosts:
+            peer-staging-backend:
+              ansible_host: 192.168.1.200
+              vm_id: 105
+              cpu_cores: 5
+              memory_gb: 32
+              disk_gb: 50
+              role: backend
+              domains:
+                - media.peerapp.eu
+                - www.media.peerapp.eu
+                - backend.peerapp.eu
+        
+        database_servers:
+          hosts:
+            peer-staging-database:
+              ansible_host: 192.168.1.210
+              vm_id: 102
+              cpu_cores: 3
+              memory_gb: 16
+              disk_gb: 20
+              role: database
+        
+        admin_servers:
+          hosts:
+            peer-staging-admin:
+              ansible_host: 192.168.1.50
+              vm_id: 103
+              cpu_cores: 1
+              memory_gb: 1
+              disk_gb: 20
+              role: admin
+        
+        bastion_servers:
+          hosts:
+            peer-staging-bastion:
+              ansible_host: 192.168.1.10
+              vm_id: 104
+              cpu_cores: 1
+              memory_gb: 2
+              disk_gb: 20
+              role: bastion
+              external_ip: 51.38.118.220
+    
+    # Group all internal VMs (excluding bastion)
+    internal:
+      children:
+        web_servers:
+        app_servers:
+        database_servers:
+        admin_servers:
+    
+    # Group VMs that need public and nginx certs access via HAProxy
+    nginx_web:
+      children:
+        web_servers:
+        app_servers:
+
+    proxmox:
+      children:
+
