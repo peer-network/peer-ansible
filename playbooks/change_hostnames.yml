@@ -48,7 +48,7 @@
       when: not (hostname_needs_change | bool)
   
   tasks:
-    - name: Backup current hostname files
+    - name: BLOCK Backup current hostname files
       block:
         - name: Backup /etc/hostname
           copy:
@@ -64,63 +64,67 @@
       when: backup_enabled | bool
       become: yes
     
-    - name: Set new hostname using hostnamectl
-      command: "hostnamectl set-hostname {{ inventory_hostname }}"
-      register: hostname_set
-      changed_when: true
-    
-    - name: Update /etc/hostname
-      copy:
-        content: "{{ inventory_hostname }}\n"
-        dest: /etc/hostname
-        mode: '0644'
-        owner: root
-        group: root
-    
-    - name: Update /etc/hosts - remove old hostname entries
-      lineinfile:
-        path: /etc/hosts
-        regexp: "{{ ansible_hostname }}"
-        state: absent
-      when: ansible_hostname != inventory_hostname
-    
-    - name: Update /etc/hosts - add new hostname
-      lineinfile:
-        path: /etc/hosts
-        regexp: '^127\.0\.1\.1'
-        line: "127.0.1.1 {{ inventory_hostname }} {{ inventory_hostname.split('.')[0] }}"
-        state: present
-    
-    - name: Ensure localhost entries are present
-      lineinfile:
-        path: /etc/hosts
-        line: "{{ item }}"
-        state: present
-      loop:
-        - "127.0.0.1 localhost"
-        - "::1 localhost ip6-localhost ip6-loopback"
-    
-    - name: Verify hostname was set
-      command: hostname
-      register: verify_hostname
-      changed_when: false
-    
-    - name: Display verification result
-      debug:
-        msg:
-          - "Old hostname: {{ ansible_hostname }}"
-          - "New hostname: {{ verify_hostname.stdout }}"
-          - "Expected: {{ inventory_hostname }}"
-          - "Success: {{ verify_hostname.stdout == inventory_hostname }}"
-    
-    - name: Update SSH host keys (optional but recommended)
-      shell: |
-        rm -f /etc/ssh/ssh_host_*
-        dpkg-reconfigure openssh-server
-      when: 
-        - hostname_needs_change | bool
-        - ansible_os_family == "Debian"
-      ignore_errors: yes
+    - name: BLOCK Change the hostname
+      block:
+        - name: Set new hostname using hostnamectl
+          command: "hostnamectl set-hostname {{ inventory_hostname }}"
+          register: hostname_set
+          changed_when: true
+        
+        - name: Update /etc/hostname
+          copy:
+            content: "{{ inventory_hostname }}\n"
+            dest: /etc/hostname
+            mode: '0644'
+            owner: root
+            group: root
+        
+        - name: Update /etc/hosts - remove old hostname entries
+          lineinfile:
+            path: /etc/hosts
+            regexp: "{{ ansible_hostname }}"
+            state: absent
+          when: ansible_hostname != inventory_hostname
+        
+        - name: Update /etc/hosts - add new hostname
+          lineinfile:
+            path: /etc/hosts
+            regexp: '^127\.0\.1\.1'
+            line: "127.0.1.1 {{ inventory_hostname }} {{ inventory_hostname.split('.')[0] }}"
+            state: present
+        
+        - name: Ensure localhost entries are present
+          lineinfile:
+            path: /etc/hosts
+            line: "{{ item }}"
+            state: present
+          loop:
+            - "127.0.0.1 localhost"
+            - "::1 localhost ip6-localhost ip6-loopback"
+        
+        - name: Verify hostname was set
+          command: hostname
+          register: verify_hostname
+          changed_when: false
+        
+        - name: Display verification result
+          debug:
+            msg:
+              - "Old hostname: {{ ansible_hostname }}"
+              - "New hostname: {{ verify_hostname.stdout }}"
+              - "Expected: {{ inventory_hostname }}"
+              - "Success: {{ verify_hostname.stdout == inventory_hostname }}"
+        
+        - name: Update SSH host keys (optional but recommended)
+          shell: |
+            rm -f /etc/ssh/ssh_host_*
+            dpkg-reconfigure openssh-server
+          when: 
+            - hostname_needs_change | bool
+            - ansible_os_family == "Debian"
+          ignore_errors: yes
+      when: true
+      become: yes 
   
   post_tasks:
     - name: Reboot to apply changes completely
