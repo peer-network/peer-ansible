@@ -135,6 +135,7 @@
       when: 
         - hostname_needs_change | bool
         - not (skip_reboot | bool)
+      become: yes
     
     - name: Wait for system to come back
       wait_for_connection:
