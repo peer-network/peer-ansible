@@ -67,9 +67,9 @@
     - name: BLOCK Change the hostname
       block:
         - name: Set new hostname using hostnamectl
-          command: "hostnamectl set-hostname {{ inventory_hostname }}"
+          command: "hostnamectl set-hostname {{ inventory_hostname }} --no-ask-password"
           register: hostname_set
-          changed_when: true
+          changed_when: trueq
         
         - name: Update /etc/hostname
           copy:
