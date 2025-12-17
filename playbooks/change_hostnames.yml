@@ -5,7 +5,7 @@
 
 ---
 - name: Verify hostname changes needed
-  hosts: all
+  hosts: internal  # no host
   gather_facts: yes
   become: no
   serial: 1  # Do one at a time to be safe
@@ -123,7 +123,7 @@
             - hostname_needs_change | bool
             - ansible_os_family == "Debian"
           ignore_errors: yes
-      when: true
+      when: ansible_hostname != 
       become: yes 
   
   post_tasks:

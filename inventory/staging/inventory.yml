@@ -98,6 +98,7 @@ all:
         app_servers:
         database_servers:
         admin_servers:
+        # bastion_servers:
     
     # Group VMs that need public and nginx certs access via HAProxy
     nginx_web:
@@ -107,4 +108,5 @@ all:
 
     proxmox:
       children:
+
 
