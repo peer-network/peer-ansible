@@ -33,6 +33,7 @@
     - proxy_fcgi
   notify: Restart Apache2
 
+# use for the default 
 - name: Create web root directory
   file:
     path: /var/www/html
