@@ -4,4 +4,5 @@
 ---
 dependencies:
   - role: common
+  - role: apache2
   - role: www_permissions
