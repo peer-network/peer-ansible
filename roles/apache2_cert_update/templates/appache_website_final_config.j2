@@ -1,0 +1,41 @@
+<VirtualHost *:80>
+    ServerName peerapp.de
+    ServerAlias www.peerapp.de
+
+    # HTTP zu HTTPS Weiterleitung
+    RewriteEngine On
+    RewriteCond %{HTTPS} off
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName peerapp.de
+    ServerAlias www.peerapp.de
+
+    DocumentRoot /var/www/html
+    DirectoryIndex index.html
+
+    # SSL Konfiguration mit Let's Encrypt
+    SSLEngine on
+    SSLCertificateFile /etc/letsencrypt/live/peerapp.de/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/peerapp.de/privkey.pem
+
+    # Sicherere SSL-Einstellungen
+    SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1
+    SSLCipherSuite HIGH:!aNULL:!MD5
+    SSLHonorCipherOrder on
+
+    <Directory /var/www/html>
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    # Verhindere den Zugriff auf versteckte Dateien wie .htaccess
+    <FilesMatch "^\.ht">
+        Require all denied
+    </FilesMatch>
+
+    # http2
+    Protocols h2 http/1.1
+</VirtualHost>
