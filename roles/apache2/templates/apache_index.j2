@@ -1,5 +1,5 @@
 <VirtualHost *:80>
-    ServerName {{ default_servernames }}
+    ServerName {{ ansible_hostname }}
     DocumentRoot /var/www/html
     <Directory /var/www/html>
         AllowOverride All
