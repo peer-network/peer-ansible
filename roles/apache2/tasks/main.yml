@@ -43,7 +43,7 @@
 
 - name: Deploy default index page
   template:
-    src: apache_index.html.j2
+    src: apache_index.j2
     dest: /var/www/html/index.html
     owner: www-data
     group: www-data
@@ -51,7 +51,7 @@
 
 - name: Configure Apache2 default site
   template:
-    src: apache_default_site.conf.j2
+    src: apache_default.j2
     dest: /etc/apache2/sites-available/000-default.conf
     owner: root
     group: root
