@@ -1,12 +1,10 @@
 ## For base peer-network config 
-# frontend.peerapp.eu -> point at web-frontend
-# website.peerapp.eu -> website
-# peerapp.eu /www.peerapp.eu -> backend
+# backend.peerapp.eu / media.peerapp.eu -> backend
 
 server {
     listen 80;
     
-    server_name {{ domains | join(' ') }};
+    server_name backend.{{ peerapp.eu }} media.{{ peerapp.eu }};  <==  backend and media
     root /var/www/html;
     index index.php index.html;
     

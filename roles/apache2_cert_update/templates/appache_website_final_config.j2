@@ -1,6 +1,6 @@
 <VirtualHost *:80>
-    ServerName peerapp.de
-    ServerAlias www.peerapp.de
+    ServerName {{ peerapp.de }}
+    ServerAlias www.{{ peerapp.de }}
 
     # HTTP zu HTTPS Weiterleitung
     RewriteEngine On
@@ -9,16 +9,16 @@
 </VirtualHost>
 
 <VirtualHost *:443>
-    ServerName peerapp.de
-    ServerAlias www.peerapp.de
+    ServerName {{ peerapp.de }}
+    ServerAlias www.{{ peerapp.de }}
 
     DocumentRoot /var/www/html
     DirectoryIndex index.html
 
     # SSL Konfiguration mit Let's Encrypt
     SSLEngine on
-    SSLCertificateFile /etc/letsencrypt/live/peerapp.de/fullchain.pem
-    SSLCertificateKeyFile /etc/letsencrypt/live/peerapp.de/privkey.pem
+    SSLCertificateFile /etc/letsencrypt/live/{{ peerapp.de }}/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/{{ peerapp.de }}/privkey.pem
 
     # Sicherere SSL-Einstellungen
     SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1

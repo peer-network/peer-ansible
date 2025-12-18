@@ -4,19 +4,19 @@
 # Matches: cp ./docker/nginx/default.conf ... && systemctl restart
 # ==================================================
 ---
-- name: Display update nginx setup message
+- name: Display update APACHE Setup message
   debug:
     msg: "Adding SSL keys to web-facing servers (vm)"
 
-- name: Copy the defaults with the hostname-DNS doain to nginx.conf 
-  ansible.builtin.template:
-    src: peerapp_server_config.j2
-    dest: /etc/nginx/sites-available/peerapp
-    mode: '0644'
-  notify: Restart Nginx
+# - name: Copy the defaults with the hostname-DNS doain to nginx.conf 
+#   ansible.builtin.template:
+#     src: peerapp_server_config.j2
+#     dest: /etc/nginx/sites-available/peerapp
+#     mode: '0644'
+#   notify: Restart Nginx
 
 - name: Display peerapp contents
-  command: cat /etc/nginx/sites-available/peerapp chdir=/etc
+  command: cat /etc/nginx/sites-available/peerapp chdir=/etc  # < Change all nginx to apache2
   register: peearapp_output
 
 - name: print out the peerapp file
@@ -28,17 +28,18 @@
   ansible.builtin.apt:
     name: 
       - certbot 
-      - python3-certbot-nginx
+      - python3-certbot-apache
     state: present
 
 - name: Certbot run
   ansible.builtin.command:
     argv:
       - certbot 
-      - --nginx 
-      - -d peerapp.eu 
-      - -d www.peerapp.eu 
-      - -d media.peerapp.eu
+      - --apache
+      - www."{{peerapp.eu }}"  #run each host is run website
+      - "{{ peerapp.eu }}"
+
+      - frontend."{{ frontend }}" #run frontend
   become: yes
   register: certbot_output
 
