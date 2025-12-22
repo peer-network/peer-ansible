@@ -40,7 +40,11 @@
       - libpq-dev
       - ffmpeg
       - tree
+      - qemu-guest-agent
     state: present
+
+
+
 
 ### setup for grafana alloy install
 
