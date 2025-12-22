@@ -1,5 +1,5 @@
 <VirtualHost *:80>
-    ServerName {{  }}  always the domin/subdomain of the vm {{ frontend }}{{ website www.ServerName }}
+    ServerName  {{ domains | join(' ') }}
     DocumentRoot /var/www/html
     <Directory /var/www/html>
         AllowOverride All

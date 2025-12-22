@@ -30,8 +30,8 @@ all:
               disk_gb: 20
               role: website
               domains:
-                - website.peerapp.eu
-                - website.www.peerapp.eu
+                - peerapp.eu
+                - www.peerapp.eu
             
             peer-prod-frontend:
               ansible_host: 192.168.1.120
@@ -53,7 +53,7 @@ all:
               disk_gb: 50
               role: backend
               domains:
-                - backend.media.peerapp.eu
+                - media.peerapp.eu
                 - backend.peerapp.eu
         
         database_servers:

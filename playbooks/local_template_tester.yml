@@ -1,0 +1,72 @@
+# ==================================================
+# FILE: Host is local
+# Playbook to test templates to be deployed
+# 
+# ==================================================
+---
+
+- name: Test templates on a localhost (client)
+  hosts: web_servers  # The tester itself
+  connection: local
+
+  vars:
+    output_dir: /home/peer/Templates
+
+  tasks:
+
+    - name: Create output directory
+      file:
+        path: "{{ output_dir }}"
+        state: directory
+        mode: '0755'
+      delegate_to: localhost
+      run_once: yes
+    
+    - name: Render template for each host
+      template:
+        src: "/home/peer/ansible/peer-ansible/roles/apache2_cert_update/templates/appache_unified_config.j2"
+        dest: "{{ output_dir }}/{{ inventory_hostname }}_apache.conf"
+        mode: '0644'
+      delegate_to: localhost
+    
+    - name: Display rendered config
+      command: cat {{ output_dir }}/{{ inventory_hostname }}_apache.conf
+      register: config_output
+      delegate_to: localhost
+      changed_when: false
+    
+    - name: Print rendered configuration
+      debug:
+        msg: "{{ config_output.stdout_lines }}"
+
+
+
+    # - name: 
+    #   debug:
+    #     msg:
+    #       - "P,ay host {{ ansible_play_hosts }}"
+    #       - "ansible_host {{ ansible_host }}"
+    #       - "Domains: {{ domains }}"
+    #       - "Role: {{ role | default('N/A') }}"
+    #       - "node name {{ ansible_facts['nodename'] }}"
+
+
+    # - name: Template a file to /etc/file.conf
+    #   local_action: 
+    #     module: ansible.builtin.template
+    #     src: /home/peer/ansible/peer-ansible/roles/apache2_cert_update/templates/appache_unified_config.j2
+    #     dest: "{{ temporary_file }}"
+    #     owner: peer
+    #     group: peer
+    #     register: 
+
+
+
+       
+
+
+      
+
+
+
+  
