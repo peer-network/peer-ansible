@@ -1,0 +1,13 @@
+# ==================================================
+# FILE: roles/apeche2/handlers/main.yml
+# ==================================================
+---
+- name: Reload Apache2
+  systemd:
+    name: apache2
+    state: reloaded
+
+- name: Restart Apache2
+  systemd:
+    name: apache2
+    state: restarted

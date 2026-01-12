@@ -22,7 +22,7 @@ all:
               ansible_port: 22
         web_servers:
           hosts:
-            peer-prod-website:
+            proxmoxhost-website:
               ansible_host: 192.168.1.110
               vm_id: 106
               cpu_cores: 1
@@ -42,7 +42,6 @@ all:
               role: frontend
               domains:
                 - frontend.peerapp.eu
-                - www.frontend.peerapp.eu
         
         app_servers:
           hosts:
@@ -55,7 +54,6 @@ all:
               role: backend
               domains:
                 - media.peerapp.eu
-                - www.media.peerapp.eu
                 - backend.peerapp.eu
         
         database_servers:
@@ -68,15 +66,15 @@ all:
               disk_gb: 20
               role: database
         
-        admin_servers:
-          hosts:
-            peer-prod-admin:
-              ansible_host: 192.168.1.50
-              vm_id: 103
-              cpu_cores: 1
-              memory_gb: 1
-              disk_gb: 20
-              role: admin
+        # admin_servers:
+        #   hosts:
+        #     peer-prod-admin:
+        #       ansible_host: 192.168.1.50
+        #       vm_id: 103
+        #       cpu_cores: 1
+        #       memory_gb: 1
+        #       disk_gb: 20
+        #       role: admin
         
         bastion_servers:
           hosts:

@@ -1,0 +1,96 @@
+
+{% if inventory_hostname == 'peer-prod-frontend' %}
+<VirtualHost *:80>
+    ServerName {{ domains[0] }}
+{% if domains | length > 1 %}
+    ServerAlias {{ domains[1:] | join(' ') }}
+{% endif %}
+    DocumentRoot /var/www/html
+    
+    RewriteEngine on
+    RewriteCond %{SERVER_NAME} ={{ domains | join(' [OR] RewriteCond %{SERVER_NAME} =') }}
+{% if inventory_hostname == 'peer-prod-website' %}
+    RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
+{% endif %}
+</VirtualHost>
+
+<IfModule mod_ssl.c>  
+<VirtualHost *:443>
+    ServerName {{ domains[0] }}
+{% if domains | length > 1 %}
+    ServerAlias {{ domains[1:] }}
+{% endif %}
+    DocumentRoot /var/www/html
+{% if inventory_hostname == 'peer-prod-website' %}
+    DirectoryIndex index.html
+{% endif %}    
+
+    SSLEngine on
+    SSLCertificateFile /etc/letsencrypt/live/{{ domains[0] }}/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/{{ domains[0] }}/privkey.pem
+    Include /etc/letsencrypt/options-ssl-apache.conf
+
+{% if inventory_hostname == 'peer-prod-frontend' %}
+    SSLProtocol all -SSLv2 -SSLv3
+    SSLCipherSuite HIGH:!aNULL:!MD5
+
+    <FilesMatch "\.(cgi|shtml|phtml|php)$">
+        SSLOptions +StdEnvVars
+    </FilesMatch>
+{% else %} ## for website 
+    # Sicherere SSL-Einstellungen
+    SSLProtocol all -SSLv3 -TLSv1 -TLSv1.1
+    SSLCipherSuite HIGH:!aNULL:!MD5
+    SSLHonorCipherOrder on
+{% endif %}  
+
+    <Directory /var/www/html>
+        Options -Indexes +FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+    
+
+</VirtualHost>
+</IfModule>
+
+{% elif inventory_hostname == 'proxmoxhost-website' %}
+<VirtualHost *:80>
+    ServerName {{ domains[0] }}
+{% if domains | length > 1 %}
+    ServerAlias {{ domains[1:] | join(' ') }}
+{% endif %}
+    DocumentRoot /var/www/html
+    
+    RewriteEngine on
+    RewriteCond %{SERVER_NAME} ={{ domains | join(' [OR] RewriteCond %{SERVER_NAME} =') }}
+    RewriteRule ^ https://%{SERVER_NAME}%{REQUEST_URI} [END,NE,R=permanent]
+</VirtualHost>
+
+<IfModule mod_ssl.c>
+<VirtualHost *:443>
+    ServerName {{ domains[0] }}
+{% if domains | length > 1 %}
+    ServerAlias {{ domains[1:] | join(' ') }}
+{% endif %}
+    DocumentRoot /var/www/html
+    
+    <Directory /var/www/html>
+        Options -Indexes +FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+    
+    <FilesMatch \.php$>
+        SetHandler "proxy:unix:/run/php/php8.3-fpm.sock|fcgi://localhost"
+    </FilesMatch>
+    
+    SSLCertificateFile /etc/letsencrypt/live/{{ domains[0] }}/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/{{ domains[0] }}/privkey.pem
+    Include /etc/letsencrypt/options-ssl-apache.conf
+</VirtualHost>
+</IfModule>
+
+{% else %}
+# Unknown hostname: {{ inventory_hostname }}
+{% endif %}

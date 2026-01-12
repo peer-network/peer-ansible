@@ -33,6 +33,7 @@
     - proxy_fcgi
   notify: Restart Apache2
 
+# use for the default 
 - name: Create web root directory
   file:
     path: /var/www/html
@@ -42,52 +43,24 @@
     mode: '0755'
 
 - name: Deploy default index page
-  copy:
-    content: |
-      <!DOCTYPE html>
-      <html>
-      <head>
-          <title>{{ inventory_hostname }}</title>
-      </head>
-      <body>
-          <h1>{{ inventory_hostname }}</h1>
-          <p>Server is running Apache2</p>
-          <p>IP: {{ ansible_host }}</p>
-      </body>
-      </html>
+  template:
+    src: apache_index.j2
     dest: /var/www/html/index.html
     owner: www-data
     group: www-data
     mode: '0644'
 
-- name: Configure Apache2 default site for PHP
-  copy:
-    content: |
-      <VirtualHost *:80>
-          ServerAdmin webmaster@localhost
-          DocumentRoot /var/www/html
-          
-          <Directory /var/www/html>
-              Options -Indexes +FollowSymLinks
-              AllowOverride All
-              Require all granted
-          </Directory>
-          
-          <FilesMatch \.php$>
-              SetHandler "proxy:unix:/run/php/php8.3-fpm.sock|fcgi://localhost"
-          </FilesMatch>
-          
-          ErrorLog ${APACHE_LOG_DIR}/error.log
-          CustomLog ${APACHE_LOG_DIR}/access.log combined
-      </VirtualHost>
+- name: Configure Apache2 default site
+  template:
+    src: apache_default.j2
     dest: /etc/apache2/sites-available/000-default.conf
     owner: root
     group: root
     mode: '0644'
   notify: Restart Apache2
 
-- name: Disable default index.html if it exists
-  file:
-    path: /var/www/html/index.html
-    state: absent
-  when: ansible_local.apache2.default_page is defined
+# - name: Disable default index.html if it exists
+#   file:
+#     path: /var/www/html/index.html
+#     state: absent
+#   when: ansible_local.apache2.default_page is defined
