@@ -1,3 +1,8 @@
+#  NGINX final config for site-aviable 
+#
+#  {{ server_defined }}; backend.peerapp.eu 
+#  {{ backend_root_path }}; /var/www/peer_backend
+ 
  map "$http_origin" $cors {
   default '';
   "~^https?://peer-network.eu(:[0-9]+)?$" "$http_origin";
@@ -12,13 +17,13 @@
 
 server {
     listen 443 ssl;
-    server_name getpeer.eu www.getpeer.eu;
-    ssl_certificate /etc/letsencrypt/live/getpeer.eu/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/getpeer.eu/privkey.pem;
+    server_name {{ server_defined }};
+    ssl_certificate /etc/letsencrypt/live/{{ server_defined }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ server_defined }}/privkey.pem;
 
 	client_max_body_size 505M;
 	   
-    root /var/www/peer_beta/peer_backend;
+    root {{ backend_root_path }};   # /var/www/peer_beta/peer_backend 
     index index.php index.html;
 
     # GraphQL-specific route
@@ -75,14 +80,14 @@ server {
 
 server {
     listen 443 ssl;
-    server_name media.getpeer.eu;
+    server_name media.{{ server_defined }};
 	
-	ssl_certificate /etc/letsencrypt/live/getpeer.eu/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/getpeer.eu/privkey.pem;
+	ssl_certificate /etc/letsencrypt/live/{{ server_defined }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ server_defined }}/privkey.pem;
 
 	client_max_body_size 80M;
 	
-    root /var/www/peer_beta/peer_backend/runtime-data/media;
+    root {{ backend_root_path }}/runtime-data/media; 
 	
 	    # Explicit Content-Type for .txt files ONLY in /text and /userData
     location ~* ^/(text|userData)/.*\.txt$ {
@@ -119,7 +124,7 @@ server {
 
 server {
     listen 80;
-    server_name media.getpeer.eu getpeer.eu www.getpeer.eu;
+    server_name media.{{ server_defined }} {{ server_defined }};
 
 	# These will catch and block malicious requests before redirect
     location ~ /\. {
