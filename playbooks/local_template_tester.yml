@@ -13,6 +13,7 @@
     output_dir: /home/peer/Templates
     backend_root_path: /var/www/peer_backend
     temp_filename: "_nginx.conf"
+    ansible_out_dest_path: "/home/peer/temp/"
 
   tasks:
 
@@ -41,7 +42,10 @@
       debug:
         msg: "Here is the template rendered {{ config_output.stdout_lines }}"
 
-
+    - name: copy from remote back to local
+      fetch:
+        src: "{{ output_dir }}/{{ inventory_hostname }}{{ temp_filename }}"
+        dest: "{{ ansible_out_dest_path }}/output{{ temp_filename }}"
 
     # - name: 
     #   debug:

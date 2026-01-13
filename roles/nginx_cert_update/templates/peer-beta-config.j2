@@ -3,17 +3,20 @@
 #  {{ inventory_hostname }}; backend.peerapp.eu 
 #  {{ backend_root_path }}; /var/www/peer_backend
  
- map "$http_origin" $cors {
+map "$http_origin" $cors {
   default '';
-  "~^https?://peer-network.eu(:[0-9]+)?$" "$http_origin";
-  "~^https?://peerapp.de(:[0-9]+)?$" "$http_origin";
+  "~^https?://frontend.peerapp.eu(:[0-9]+)?$" "$http_origin";
+  "~^https?://frontend.peernetwork.eu(:[0-9]+)?$" "$http_origin";
+  "~^https?://frontend.peer-network.eu(:[0-9]+)?$" "$http_origin";
+  "~^https?://frontend.peerapp.de(:[0-9]+)?$" "$http_origin";
   "~^https?://frontend.getpeer.eu(:[0-9]+)?$" "$http_origin";
-  "~^https?://testing.getpeer.eu(:[0-9]+)?$" "$http_origin";
-  
-  # Allow localhost with any port for development
+  {% if peer_env == "prod" %}
+  # Allow localhost with any port for development and staging (comment this block in production)
   "~^https?://localhost(:[0-9]+)?$" "$http_origin";
   "~^https?://127.0.0.1(:[0-9]+)?$" "$http_origin";
+  {% endif %}
 }
+
 
 server {
     listen 443 ssl;

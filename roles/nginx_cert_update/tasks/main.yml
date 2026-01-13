@@ -52,3 +52,15 @@
     dest: /etc/nginx/sites-available/peerapp
     mode: '0644'
   notify: Restart Nginx
+
+- name: "Run a Nginx Test"
+  ansible.builtin.command:
+    argv:
+      - nginx
+      - -T
+  become: yes
+  register: nginx_test
+
+- name: "Nginx Test {{ ansible_host }}" 
+  debug:
+    msg: "output from certbot {{ nginx_test }}" 

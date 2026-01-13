@@ -66,15 +66,15 @@ all:
               disk_gb: 20
               role: database
         
-        # admin_servers:
-        #   hosts:
-        #     peer-prod-admin:
-        #       ansible_host: 192.168.1.50
-        #       vm_id: 103
-        #       cpu_cores: 1
-        #       memory_gb: 1
-        #       disk_gb: 20
-        #       role: admin
+        admin_servers:
+          hosts:
+            peer-prod-admin:
+              ansible_host: 192.168.1.50
+              vm_id: 103
+              cpu_cores: 1
+              memory_gb: 1
+              disk_gb: 20
+              role: email
         
         bastion_servers:
           hosts:
