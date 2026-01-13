@@ -34,9 +34,8 @@
   ansible.builtin.command:
     argv:
       - certbot 
-      - --nginx 
-      - -d peerapp.eu 
-      - -d www.peerapp.eu 
+      - --nginx  
+      - -d backend.peerapp.eu 
       - -d media.peerapp.eu
   become: yes
   register: certbot_output
