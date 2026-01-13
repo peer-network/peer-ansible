@@ -39,7 +39,7 @@
     
     - name: Print rendered configuration
       debug:
-        msg: "{{ config_output.stdout_lines }}"
+        msg: "Here is the template rendered {{ config_output.stdout_lines }}"
 
 
 
