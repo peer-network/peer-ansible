@@ -11,6 +11,8 @@
 
   vars:
     output_dir: /home/peer/Templates
+    backend_root_path: /var/www/peer_backend
+    temp_filename: "_nginx.conf"
 
   tasks:
 
@@ -21,16 +23,16 @@
         mode: '0755'
       delegate_to: localhost
       run_once: yes
-    
+
     - name: Render template for each host
       template:
-        src: "/home/peer/ansible/peer-ansible/roles/apache2_cert_update/templates/appache_unified_config.j2"
-        dest: "{{ output_dir }}/{{ inventory_hostname }}_apache.conf"
+        src: "/home/peer/ansible/peer-ansible/roles/nginx_cert_update/templates/peer-beta-config.j2"
+        dest: "{{ output_dir }}/{{ inventory_hostname }}{{ temp_filename }}"
         mode: '0644'
       delegate_to: localhost
     
     - name: Display rendered config
-      command: cat {{ output_dir }}/{{ inventory_hostname }}_apache.conf
+      command: cat {{ output_dir }}/{{ inventory_hostname }}{{ temp_filename }}
       register: config_output
       delegate_to: localhost
       changed_when: false
@@ -54,6 +56,7 @@
     # - name: Template a file to /etc/file.conf
     #   local_action: 
     #     module: ansible.builtin.template
+    #     src: "/home/peer/ansible/peer-ansible/roles/apache2_cert_update/templates/appache_unified_config.j2"
     #     src: /home/peer/ansible/peer-ansible/roles/apache2_cert_update/templates/appache_unified_config.j2
     #     dest: "{{ temporary_file }}"
     #     owner: peer

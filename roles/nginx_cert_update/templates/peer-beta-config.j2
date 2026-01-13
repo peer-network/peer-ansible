@@ -1,6 +1,6 @@
 #  NGINX final config for site-aviable 
 #
-#  {{ server_defined }}; backend.peerapp.eu 
+#  {{ inventory_hostname }}; backend.peerapp.eu 
 #  {{ backend_root_path }}; /var/www/peer_backend
  
  map "$http_origin" $cors {
@@ -17,9 +17,9 @@
 
 server {
     listen 443 ssl;
-    server_name {{ server_defined }};
-    ssl_certificate /etc/letsencrypt/live/{{ server_defined }}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/{{ server_defined }}/privkey.pem;
+    server_name {{ inventory_hostname }};
+    ssl_certificate /etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ inventory_hostname }}/privkey.pem;
 
 	client_max_body_size 505M;
 	   
@@ -80,10 +80,10 @@ server {
 
 server {
     listen 443 ssl;
-    server_name media.{{ server_defined }};
+    server_name media.{{ inventory_hostname }};
 	
-	ssl_certificate /etc/letsencrypt/live/{{ server_defined }}/fullchain.pem;
-    ssl_certificate_key /etc/letsencrypt/live/{{ server_defined }}/privkey.pem;
+	ssl_certificate /etc/letsencrypt/live/{{ inventory_hostname }}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/{{ inventory_hostname }}/privkey.pem;
 
 	client_max_body_size 80M;
 	
@@ -124,7 +124,7 @@ server {
 
 server {
     listen 80;
-    server_name media.{{ server_defined }} {{ server_defined }};
+    server_name media.{{ inventory_hostname }} {{ inventory_hostname }};
 
 	# These will catch and block malicious requests before redirect
     location ~ /\. {
