@@ -1,6 +1,6 @@
 # ==================================================
 # FILE: roles/nginx/tasks/main.yml
-# Installing Nginx:  Setup Nginx configuration
+# Installing Nginx:  Update Nginx configuration
 # Matches: cp ./docker/nginx/default.conf ... && systemctl restart
 # ==================================================
 ---
