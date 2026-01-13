@@ -17,11 +17,11 @@
     enabled: yes
   loop:
     - apache2
-    - php8.3-fpm
+    - "php{{ php_version }}-fpm"
 
 - name: Verify PHP-FPM socket exists
   stat:
-    path: /run/php/php8.3-fpm.sock
+    path: "/run/php/php{{ php_version }}-fpm.sock"
   register: php_sock
   failed_when: not php_sock.stat.exists
 

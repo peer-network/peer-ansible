@@ -5,7 +5,7 @@
 ---
 dependencies:
   - role: common          # STEP 1
-  - role: php83
+  - role: php
   - role: postgress       # STEP 2, 3
   - role: nginx           # STEP 4
   - role: www_permissions # STEP 5

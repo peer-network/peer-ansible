@@ -47,7 +47,7 @@ The repository follows a conventional **Ansible directory structure**:
 │ │ └── main.yml
 │ └── tasks
 │ └── main.yml
-└── php83
+└── php
 ├── handlers
 │ └── main.yml
 └── tasks

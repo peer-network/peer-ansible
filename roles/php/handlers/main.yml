@@ -1,13 +1,13 @@
 # ==================================================
-# FILE: roles/php83/handlers/main.yml (backend)
+# FILE: roles/php/handlers/main.yml (backend)
 # ==================================================
 ---
 - name: Restart PHP-FPM
   systemd:
-    name: php8.3-fpm
+    name: "php{{ php_version }}-fpm"
     state: restarted
 
 - name: Reload PHP-FPM
   systemd:
-    name: php8.3-fpm
+    name: "php{{ php_version }}-fpm"
     state: reloaded

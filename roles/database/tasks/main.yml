@@ -6,7 +6,7 @@
 
 - name: Edit fpm to add more power
   ansible.builtin.blockinfile:
-    path: /etc/php/8.3/fpm/pool.d/www.conf
+    path:  "/etc/php/{{ php_version }}/fpm/pool.d/www.conf"
     append_newline: true
     prepend_newline: true
     marker: "; {mark} ANSIBLE MANAGED BLOCK" 
@@ -24,7 +24,7 @@
 ### update  Add to file /etc/php/8.3/mods-available/opcache.ini
 - name: Edit mods-available opcache ini
   ansible.builtin.blockinfile:
-    path: /etc/php/8.3/mods-available/opcache.ini
+    path:  "/etc/php/{{ php_version }}/mods-available/opcache.ini"
     append_newline: true
     prepend_newline: true
     block: |
@@ -43,7 +43,7 @@
 ##  Last file, restart php
 - name: Edit php-ini file
   ansible.builtin.blockinfile:
-    path: /etc/php/8.3/fpm/php.ini
+    path:  "/etc/php/{{ php_version }}/fpm/php.ini"
     append_newline: true
     prepend_newline: true
     marker: "; {mark} ANSIBLE MANAGED BLOCK" 
@@ -62,63 +62,11 @@
   debug: 
     msg:
     - "completed update for:"
-    - "/etc/php/8.3/fpm/pool.d/www.conf"
-    - "/etc/php/8.3/mods-available/opcache.ini"
-    - "/etc/php/8.3/fpm/php.ini"
+    - "/etc/php/{{ php_version }}/fpm/pool.d/www.conf"
+    - "/etc/php/{{ php_version }}/mods-available/opcache.ini"
+    - "/etc/php/{{ php_version }}/fpm/php.ini"
     - "Restarting PHP-FPM"
   changed_when: true
   notify: Restart PHP-FPM
 
-
-
-  # ansible_user: "{{ ansible_user | default('peer') }}"
-
-
-
-
-
-    # - name: "Create app database"
-    #   postgresql_db:
-    #     state: present
-    #     name: "{{ db_name }}"
-    #   become: yes
-    #   become_user: postgres
-
-    # - name: "Create db user"
-    #   postgresql_user:
-    #     state: present
-    #     name: "{{ db_user }}"
-    #     password: "{{ db_password }}"
-    #   become: yes
-    #   become_user: postgres
-
-    # - name: "Grant db user access to app db"
-    #   postgresql_privs:
-    #     type: database
-    #     database: "{{ db_name }}"
-    #     roles: "{{ db_user }}"
-    #     grant_option: no
-    #     privs: all
-    #   become: yes
-    #   become_user: postgres
-
-    # - name: "Allow md5 connection for the db user"
-    #   postgresql_pg_hba:
-    #     dest: "~/data/pg_hba.conf"
-    #     contype: host
-    #     databases: all
-    #     method: md5
-    #     users: "{{ db_user }}"
-    #     create: true
-    #   become: yes
-    #   become_user: postgres
-    #   notify: restart postgres
- 
-    # - name: "Load SQL script into a variable"
-    #   set_fact:
-    #     migration_sql: "{{ lookup('file', 'conf/migration.sql') }}"
-
-    # - name: "Execute script from variable"
-    #   command: "psql {{ db_name }} -c {{ migration_sql }}"
-    #   become_user: postgres
-    #   register: sql_response_variable
+  ### Ende

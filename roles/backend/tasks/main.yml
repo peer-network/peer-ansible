@@ -17,11 +17,11 @@
     enabled: yes
   loop:
     - nginx
-    - php8.3-fpm
+    - "php{{ php_version }}-fpm"
 
 - name: Verify PHP-FPM socket exists
   stat:
-    path: /run/php/php8.3-fpm.sock
+    path: "/run/php/php{{ php_version }}-fpm.sock"
   register: php_sock
   failed_when: not php_sock.stat.exists
 
@@ -29,7 +29,7 @@
   debug:
     msg:
       - "Backend server setup complete!"
-      - "PHP Version: 8.3"
+      - "PHP Version: php{{ php_version }}-fpm"
       - "Web Server: Nginx"
       - "Document Root: /var/www/html/public"
       - "Test URL: http://{{ ansible_host }}/test.php"

@@ -4,7 +4,7 @@
 # ==================================================
 ---
 
-- name: Install Backend Server (PHP 8.3 + Nginx + Rust)
+- name: Install Backend Server (PHP 8.4 + Nginx + Rust)
   hosts: peer-prod-backend
   become: yes
   
@@ -15,7 +15,8 @@
     php_post_max: "510M"
     php_max_execution_time: "3600"
     # ansible_user: "{{ ansible_user | default('peer') }}"
-    
+    php_version: "8.4"
+
   ### Thisis a role of roles, as 'backend' will call other roles  
   roles:
     - backend
