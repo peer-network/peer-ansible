@@ -34,7 +34,7 @@
         state: link
 
     - name: Test nginx configuration
-      command: nginx -t
+      command: nginx -T
       register: nginx_test
       changed_when: false
 

@@ -1,0 +1,82 @@
+## Host stream.config file for NGINX
+## template file
+stream {
+    map $ssl_preread_server_name $backend_443 {
+        frontend.peerapp.eu  192.168.1.120:443;
+        backend.peerapp.eu   192.168.1.200:443;
+        media.peerapp.eu     192.168.1.200:443;
+        peerapp.eu           192.168.1.110:443;
+        www.peerapp.eu       192.168.1.110:443;
+        default              192.168.1.110:443;
+        admin.peerapp.eu     192.168.1.50:443;   # ← Add admin
+        mail.peerapp.eu      192.168.1.50:443;   # ← Add mail if needed
+        imap.peerapp.eu      192.168.1.50:993;   #
+    }
+
+    # Stalwart web admin
+    upstream stalwart_admin {
+        server 192.168.1.50:8080;
+    }
+
+    server {
+        listen 8080;
+        proxy_pass stalwart_admin;
+    }
+    
+    server {
+        listen 443;
+        proxy_pass $backend_443;
+        ssl_preread on;
+    }
+
+# SMTP (25) - Mail submission
+#    server {
+#        listen 25;
+#        proxy_pass 192.168.1.50:25;
+#    }
+    
+    # POP3 (110)
+    server {
+        listen 110;
+        proxy_pass 192.168.1.50:110;
+    }
+    
+    # IMAP (143)
+    server {
+        listen 143;
+        proxy_pass 192.168.1.50:143;
+    }
+
+    # SMTPS (465) - SMTP over SSL
+    server {
+        listen 465;
+        proxy_pass 192.168.1.50:465;
+        ssl_preread on;
+    }
+    
+    # SMTP Submission (587) - Authenticated SMTP
+    server {
+        listen 587;
+        proxy_pass 192.168.1.50:587;
+    }
+    
+#   IMAPS (993) - IMAP over SSL
+#    server {
+#        listen 993;
+#        proxy_pass 192.168.1.50:993;
+#        ssl_preread on;
+#    }
+    
+    # POP3S (995) - POP3 over SSL
+    server {
+        listen 995;
+        proxy_pass 192.168.1.50:995;
+        ssl_preread on;
+    }
+
+    # ManageSieve (4190) - Mail filtering
+    server {
+        listen 4190;
+        proxy_pass 192.168.1.50:4190;
+    }
+}
