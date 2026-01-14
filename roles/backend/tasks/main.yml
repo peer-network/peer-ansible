@@ -5,7 +5,7 @@
 ---
 - name: Display backend setup message
   debug:
-    msg: "Setting up backend server with PHP 8.3, Nginx, and Rust"
+    msg: "Setting up backend server with PHP{{ php_version }}, Nginx, and Rust"
 
 # The actual installation is handled by role dependencies
 # defined in roles/backend/meta/main.yml

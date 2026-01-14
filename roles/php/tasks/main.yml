@@ -53,8 +53,7 @@
 #     - libzip-dev 
 #     - zlib1g-dev 
 #     - libxml2-dev 
-#     - libcurl4-openssl-dev 
-#     - libgmp-dev 
+#     - libcurl4-openssl-d    - libgmp-dev 
 #     - libffi-dev 
 #     - pkg-config 
 #     - ffmpeg
@@ -119,7 +118,7 @@
 
 - name: Configure PHP-FPM pool
   lineinfile:
-    path: /etc/php/8.3/fpm/pool.d/www.conf
+    path: "/etc/php/{{ php_version}}/fpm/pool.d/www.conf"
     regexp: "{{ item.regexp }}"
     line: "{{ item.line }}"
     backup: yes
