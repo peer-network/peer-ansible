@@ -1,0 +1,166 @@
+# /etc/nginx/sites-available/peerapp-proxy
+# Reverse proxy configuration for {{ peer_domain }} domains
+
+# Upstream definitions - backend VM pools
+upstream website_backend {
+    server 192.168.1.110:80;  # peer-prod-website
+}
+
+upstream frontend_backend {
+    server 192.168.1.120:80;  # peer-prod-frontend
+}
+
+upstream media_backend {
+    server 192.168.1.200:80;  # peer-prod-backend
+}
+
+server {
+    listen 80;
+    server_name peerapp.eu www.peerapp.eu;
+        location / {
+        proxy_pass http://192.168.1.110:80;
+        proxy_set_header Host $host;
+    }
+}
+
+server {
+    listen 80;
+    server_name frontend.peerapp.eu;
+        location / {
+        proxy_pass http://192.168.1.120:80;
+        proxy_set_header Host $host;
+    }
+}
+
+
+# HTTP to HTTPS redirect (optional, recommended for production)
+server {
+    listen 80;
+    listen [::]:80;
+    server_name peerapp.eu www.peerapp.eu 
+                website.peerapp.eu www.website.peerapp.eu 
+                frontend.peerapp.eu www.frontend.peerapp.eu 
+                media.peerapp.eu www.media.peerapp.eu 
+                backend.peerapp.eu;
+
+
+    # For Let's Encrypt validation
+    location /.well-known/acme-challenge/ {
+        root /var/www/html;
+    }
+
+    # Redirect all other traffic to HTTPS (uncomment when SSL is ready)
+    # location / {
+    #     return 301 https://$host$request_uri;
+    # }
+
+    # For now, proxy HTTP traffic directly (remove this block when enabling HTTPS)
+    location / {
+        # Route based on hostname
+        if ($host ~ ^(www\.)?peerapp\.eu$) {
+            proxy_pass http://website_backend;
+        }
+        if ($host ~ ^(www\.)?website\.peerapp\.eu$) {
+            proxy_pass http://website_backend;
+        }
+        if ($host ~ ^(www\.)?frontend\.peerapp\.eu$) {
+            proxy_pass http://frontend_backend;
+        }
+        if ($host ~ ^(www\.)?media\.peerapp\.eu$) {
+            proxy_pass http://media_backend;
+        }
+        if ($host = backend.peerapp.eu) {
+            proxy_pass http://media_backend;
+        }
+
+        # Proxy headers
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # WebSocket support (if needed)
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        
+        # Timeouts
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+}
+
+
+# Admin - admin.peerapp.eu (and mail if you want web access)
+server {
+    listen 80;
+    server_name admin.peerapp.eu mail.peerapp.eu;
+
+    location / {
+        proxy_pass http://192.168.1.50;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+
+# HTTPS configuration (enable after obtaining SSL certificates)
+# server {
+#     listen 443 ssl http2;
+#     listen [::]:443 ssl http2;
+#     server_name peerapp.eu www.peerapp.eu website.peerapp.eu www.website.peerapp.eu;
+#
+#     ssl_certificate /etc/letsencrypt/live/peerapp.eu/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/peerapp.eu/privkey.pem;
+#     include /etc/letsencrypt/options-ssl-nginx.conf;
+#     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+#
+#     location / {
+#         proxy_pass http://website_backend;
+#         proxy_set_header Host $host;
+#         proxy_set_header X-Real-IP $remote_addr;
+#         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#         proxy_set_header X-Forwarded-Proto $scheme;
+#     }
+# }
+#
+# server {
+#     listen 443 ssl http2;
+#     listen [::]:443 ssl http2;
+#     server_name frontend.peerapp.eu www.frontend.peerapp.eu;
+#
+#     ssl_certificate /etc/letsencrypt/live/peerapp.eu/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/peerapp.eu/privkey.pem;
+#     include /etc/letsencrypt/options-ssl-nginx.conf;
+#     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+#
+#     location / {
+#         proxy_pass http://frontend_backend;
+#         proxy_set_header Host $host;
+#         proxy_set_header X-Real-IP $remote_addr;
+#         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#         proxy_set_header X-Forwarded-Proto $scheme;
+#     }
+# }
+#
+# server {
+#     listen 443 ssl http2;
+#     listen [::]:443 ssl http2;
+#     server_name media.peerapp.eu www.media.peerapp.eu backend.peerapp.eu;
+#
+#     ssl_certificate /etc/letsencrypt/live/peerapp.eu/fullchain.pem;
+#     ssl_certificate_key /etc/letsencrypt/live/peerapp.eu/privkey.pem;
+#     include /etc/letsencrypt/options-ssl-nginx.conf;
+#     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+#
+#     location / {
+#         proxy_pass http://media_backend;
+#         proxy_set_header Host $host;
+#         proxy_set_header X-Real-IP $remote_addr;
+#         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#         proxy_set_header X-Forwarded-Proto $scheme;
+#     }
+# }
