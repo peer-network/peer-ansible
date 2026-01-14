@@ -11,6 +11,7 @@
   become: yes
   
   roles:
+    - common
     - nginx
 
   vars:
@@ -21,6 +22,12 @@
       file:
         path: /etc/nginx/sites-enabled/default
         state: absent
+
+    - name: Create nginx config for reverse proxy
+      template:
+        src: templates/nginx-reverse-proxy.conf.j2
+        dest: /etc/nginx/sites-available/reverse-proxy.conf
+        
 
     - name: Create nginx config for reverse proxy
       template:
