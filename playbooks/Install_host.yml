@@ -23,11 +23,10 @@
         path: /etc/nginx/sites-enabled/default
         state: absent
 
-    - name: Create nginx config for reverse proxy
+    - name: Create default nginx config for certbot
       template:
-        src: templates/nginx-reverse-proxy.conf.j2
-        dest: /etc/nginx/sites-available/reverse-proxy.conf
-        
+        src: templates/base_server_config.j2
+        dest: /etc/nginx/sites-enabled/default
 
     - name: Create nginx config for reverse proxy
       template:
