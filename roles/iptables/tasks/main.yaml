@@ -1,0 +1,26 @@
+# ==================================================
+# FILE: roles/iptables install
+# Hostadd iptables
+# ==================================================
+---
+- name: Display Frontend setup message
+  debug:
+    msg: "Setting up Hosts Iptables"
+
+# The actual installation is handled by role dependencies
+# defined in roles/Frontend/meta/main.yml
+
+- name: Template a file to iptables rules
+  ansible.builtin.template:
+    src: iptables_save
+    dest: /etc/iptables/rules.v4
+    mode: '0640'
+
+- name: restore firewall state from a file
+  community.general.iptables_state:
+    state: restored
+    path: /run/iptables.apply
+  async: "{{ ansible_timeout }}"
+  poll: 0
+
+  become: yes
